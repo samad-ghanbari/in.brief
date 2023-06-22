@@ -1,0 +1,250 @@
+Emmet <emmet.io>
+Emmet is a set of plug-ins for text editors that allow for high-speed coding and editing in HTML, XML, XSLT, and other structured code formats via content assist.
+
+___________
+
+!
+// when we type ! and enter emmet automatically writes html doc.
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+</body>
+</html>
+
+___________
+
+write tag name and it willl creates complete section.
+
+body	<body></body>
+
+div 	<div></div>
+
+span 	<span></span>
+
+head	<head></head>
+
+p	<p></p>
+
+h1	<h1></h1>
+
+h2	<h2></h2>
+
+h3	<h3></h3>
+
+h4	<h4></h4>
+
+h5	<h5></h5>
+
+h6	<h6></h6>
+
+___________
+
+ID & CLASS
+
+id #
+class .
+
+h1.title		<h1 class="title"></h1>
+
+p#title.post	<p id="title" class="post"></p>
+
+div.block#d1	<div class="block" id="d1"></div>
+
+#div2		<div id="div2"></div>
+
+
+___________
+
+Nesting
+
+ul>li
+	<ul>
+    	     <li></li>	
+	</ul>
+
+section>p>a
+	
+	<section>
+	    <p><a href=""></a></p>
+	</section>
+
+table>tbody>tr>td
+	<table>
+	    <tbody>
+	        <tr>
+		  <td></td>
+	        </tr>
+	    </tbody>
+	</table>
+___________
+
+Sibling
+
+H1+p
+
+	<H1></H1>
+	<p></p>
+
+
+article>div>p+H3
+
+	<article>
+	    <div>
+	        <p></p>
+	        <H3></H3>
+	    </div>
+	</article>
+
+___________
+
+Multiply
+
+ul>li*3
+
+	<ul>
+	    <li></li>
+	    <li></li>
+	    <li></li>
+	</ul>
+
+
+ul>li.class1*2
+
+	<ul>
+	    <li class="class1"></li>
+	    <li class="class1"></li>
+	</ul>
+
+___________
+
+Attribute
+
+img[title]
+	<img src="" alt="" title="">
+
+img[title='logo' data='icon']
+	<img src="" alt="" title="logo" data="icon">
+
+img[title='logo'][data='icon']
+	<img src="" alt="" title="logo" data="icon">
+___________
+
+Numbering
+
+$     1, 2, 3 ...
+$$    01, 02, 03 ...
+$$$   001, 002, 003, ...
+
+$@3   3,4, 5 ,..
+
+ul>li#id$$*3
+	<ul>
+	    <li id="id01"></li>
+	    <li id="id02"></li>
+	    <li id="id03"></li>
+	</ul>
+
+ul>li.class-$@100*2
+	<ul>
+	    <li class="class-100"></li>
+	    <li class="class-101"></li>
+	</ul>
+
+___________
+
+Lorem Ipsum
+
+lorem
+	Lorem ipsum dolor sit amet, consectetur adipisicing elit. Rerum eligendi molestiae vero ex architecto laborum ab omnis. At, cum fuga magnam inventore voluptatum quae rem, cupiditate quisquam, dolorum perferendis dolorem!
+
+
+lorem1
+	Lorem.
+
+lorem5
+	Lorem ipsum dolor sit amet.
+
+ul>li*3>a>lorem2
+	<ul>
+	    <li><a href="">Lorem, ipsum.</a></li>
+	    <li><a href="">Officia, magni!</a></li>
+	    <li><a href="">Officia, nemo?</a></li>
+	</ul>
+
+
+___________
+
+Text
+
+P{This is text}
+	<P>This is text</P>
+
+a>{my link}
+	<a href="">my link</a>
+
+ul>li.class-$*3>{item-$}
+	<ul>
+	    <li class="class-1">item-1</li>
+	    <li class="class-2">item-2</li>
+	    <li class="class-3">item-3</li>
+	</ul>
+___________
+
+Climb-up
+
+ul>li*2^p
+	<ul>
+	    <li></li>
+	    <li></li>
+	</ul>
+	<p></p>
+	
+section>h1>span^^article
+	<section>
+	    <h1><span></span></h1>
+	</section>
+	<article></article>
+
+___________
+
+Grouping
+
+div>(header>ul>li*3>a>{text-$})+(footer>ul>li*2>text-$$)
+	<div>
+	    <header>
+	        <ul>
+		  <li><a href="">text-1</a></li>
+		  <li><a href="">text-2</a></li>
+		  <li><a href="">text-3</a></li>
+	        </ul>
+	    </header>
+	    <footer>
+	        <ul>
+		  <li>text-01</li>
+		  <li>text-02</li>
+	        </ul>
+	    </footer>
+	</div>
+	
+___________
+
+css
+
+link:css
+	<link rel="stylesheet" href="style.css">
+
+link:favicon
+	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">	
+
+___________
+
+
+

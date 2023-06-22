@@ -1,0 +1,1331 @@
+############################### apache error reporting:
+
+in file /etc/php/7.2/apache/php.ini: uncomment line: error_reporting
+systetmctl restart apache2
+
+############################### INSTALL
+
+sudo composer create-project --prefer-dist yiisoft/yii2-app-basic project1
+
+###############################
+
+by default index.php exists in folder helloworld/web
+now we want to put it in helloworld folder
+-so move index.php to project root folder
+-open it and change the path:
+	require __DIR__ . '/vendor/autoload.php';
+	require __DIR__ . '/vendor/yiisoft/yii2/Yii.php';
+
+	$config = require __DIR__ . '/config/web.php';
+	...
+they are like __DIR__ . '/../vendor/autoload.php';
+-open /asset/AppAsset.php and modify:
+		    public $css = [
+        		'web/css/site.css',
+				]
+
+- make folder writable
+
+############################### URL
+
+url:
+localhost/helloworld/index.php?r=site/login
+here:
+	site >>> is controller. there must be a php file named SiteController.php in controllers.(name starts with capital)
+		 it contains:
+			<?php
+
+			namespace app\controllers;
+			use \yii\web\Controller;
+
+			class SiteController extends Controller
+			{}
+
+	login >> is action. inside controller class we must have action which is public function named actionLogin()
+		so:
+			<?php
+
+			namespace app\controllers;
+			use \yii\web\Controller;
+
+			class SiteController extends Controller
+			{
+			    public  function actionLogin()
+			    {
+				return $this->render("login");
+			    }
+			}
+
+	render is a function of Controller which render file named login.php inside /view/site/
+	so page in view/site/login.php will shows.
+
+############################### PRETTY URL
+pretty url is:
+	www.project1.com/controller/action
+
+in config web.php
+uncomment:
+	 'urlManager' => [
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+            'rules' => [
+            ],
+           
+we should allow apache to use htaccess file:
+	1- sudo a2enmod rewrite
+	    
+	2- gedit /etc/apache2/sites-availables/000-default.config
+		inside tag <virtualhost> and after line "DocumentRoot /var/www/html" add:
+		
+			<Directory /var/www/html>
+				Options Indexes FollowSymLinks MultiViews
+				AllowOverride All
+				Require all granted
+			</Directory>
+
+
+############################### YII DEBUG DISABLE
+index.php
+	defined('YII_DEBUG') or define('YII_DEBUG', false);
+	
+############################### Database Postgresql
+
+config/db.php
+	return [
+	    'class' => 'yii\db\Connection',
+	    'dsn' => 'pgsql:host=localhost;dbname=pc',
+	    'username' => 'pc',
+	    'password' => '...',
+	    'charset' => 'utf8',
+	];
+
+############################### DISABLE GII
+config/web.php
+
+remove:
+
+    $config['bootstrap'][] = 'gii';
+    $config['modules']['gii'] = [
+        'class' => 'yii\gii\Module',
+        // uncomment the following to add your IP if you are not connecting from localhost.
+        //'allowedIPs' => ['127.0.0.1', '::1'],
+    ];
+
+############################### REMOVE DEBUG BAR
+config/web.php:
+
+remove:
+
+    $config['bootstrap'][] = 'debug';
+    $config['modules']['debug'] = [
+        'class' => 'yii\debug\Module',
+        // uncomment the following to add your IP if you are not connecting from localhost.
+        //'allowedIPs' => ['127.0.0.1', '::1'],
+    ];
+
+############################### MODULE LAYOUT
+config/web.php
+	inside array of config:
+
+	    'modules' => ['aghili' => [
+          'class' => 'app\modules\aghili\Module',
+          'layout' =>'main.php'    <<<< needed
+                              ]],
+
+############################### COMPONENTS
+
+for create php components:
+	the php file name and the class must be the same.[Jdf.php]
+		<?php
+			namespace app\components;
+			use Yii;
+			use yii\base\Component;
+
+			class Jdf extends Component
+			{
+				public static function xxx()
+				{...}
+			....
+			} 
+			
+		?>
+
+
+because of class, functions must be called with self::x()
+____________________
+
+
+in config/web.php
+	inside components:
+
+        'jdf' => [
+
+          'class' => 'app\components\Jdf',
+
+        ],
+
+or in view when using:
+	use app\components\CartWidget;
+
+############################### REGISTER JS
+
+$this->registerJs(
+    "$('#myButton').on('click', function() { alert('Button clicked!'); });",   <<js
+    Yii\web\View::POS_READY,      <<< position of code
+    'my-button-handler'   <<< id of code. can be ommited
+);
+
+    View::POS_HEAD for head section.
+    View::POS_BEGIN for right after opening <body>.
+    View::POS_END for right before closing </body>.
+    View::POS_READY for executing code on the document ready event. This will automatically register jQuery and wrap the code into the appropriate 		jQuery code. This is the default position.
+    View::POS_LOAD for executing code on the document load event. Same as the above, this will also register jQuery automatically.
+
+
+better to use <<<JS like:
+	$var1 = "asdadas";
+	$script = <<<JS
+		write js codes;
+		var p1 = $var1;    <<< php parameters inside it
+		   JS;
+
+	$this->registerJs($script, \Yii\web\View::POS_END);
+
+
+############################### Registering script files
+
+$this->registerJsFile( '@web/js/main.js', ['depends' => [\yii\web\JqueryAsset::class]] );
+
+	* It means that the main.js file will be added AFTER jquery.js.
+	 Without such dependency specification, the relative order between main.js and jquery.js would be undefined
+	  and the code would not work.
+	  
+	  
+	  
+###############################  Registering CSS
+
+$this->registerCssFile("@web/css/themes/black-and-white.css", 
+			[
+			 'depends' => [\yii\bootstrap\BootstrapAsset::class],
+			 'media' => 'print'
+			], 'css-print-theme');
+
+
+
+	*The last argument specifies an ID identifying this CSS file. If it is not provided, the URL of the CSS file will be used instead.
+	
+############################### Views MODEL
+
+each model must have a primary key
+by default in database view creation no primary key is defined.
+we can handle it in model class:
+	  public static function primaryKey()
+	  {
+	    return ['int_id'];
+	  }
+
+############################### JALALI DATE PICKER
+
+php composer.phar require --prefer-dist faravaghi/yii2-jalali-datepicker "*"
+
+            <?= $form->field($model, 'birth_date', ['labelOptions'=>['class'=>'default-color']])->widget(jalaliDatePicker::className(), ['options' =>['format' => 'yyyy/mm/dd','viewformat' => 'yyyy/mm/dd','placement' => 'left','todayBtn'=> 'linked'],'htmlOptions' => ['id' => 'date','style'=>"height: 40px;", 'class'	=> 'form-control']]); ?>
+
+
+***  mrlco jalali date picker 
+	composer require mrlco/yii2-jalali-datepicker
+	
+***   example
+	// as a widget
+	<?= mrlco\datepicker\Datepicker::widget([
+	    'model' => $model,
+	    'attribute' => 'date',
+	    'template' => '{addon}{input}',
+	        'clientOptions' => [
+		  'format' => 'YYYY/MM/DD'
+	        ]
+	]);?>
+
+	
+	// with an ActiveForm instance 
+	<?= $form->field($model, 'date')->widget(
+	    mrlco\datepicker\Datepicker::className(), [
+	        'inline' => true,
+	        'template' => '<div class="well well-sm" style="background-color: #fff; width:250px">{input}</div>',
+	        'clientOptions' => [
+		  'format' => 'YYYY/MM/DD'
+	        ]
+	]);?>
+	
+	//use without any model
+	<?= mrlco\datepicker\Datepicker::widget([
+	    'name' => 'Test',
+	    'value' => '1394/03/23',
+	    'template' => '{addon}{input}',
+	        'clientOptions' => [
+		  'format' => 'YYYY/MM/DD'
+	        ]
+	]);?>
+	
+	
+******************************	
+	
+	      if(intval($pSitex_param->value) > 0)
+                {
+                    //convert ts to gerigorian
+                    $pSitex_param->value  = gmdate("y/m/d", intval($pSitex_param->value));
+                }
+
+                echo $form->field($pSitex_param, 'value', ['options' => ['class' => "row m-2"],
+                				         'labelOptions' => ['class' => "col-md-4  text-right "]])
+                    ->widget(
+                                mrlco\datepicker\Datepicker::className(),
+                                [
+                                        'options'=>['name'=>"param-value", 'class'=>"col-md-8 max-width-200px text-left "],
+                                        'clientOptions' => ['format' => 'YYYY/MM/DD']
+                                ]
+                             )->label($parameter->parameter);
+                             
+******************************                             
+                             
+############################### BOOTSTRAP CSS
+vendor/bower-asset/dist/css/bootsrap.css
+	modify dropdown
+
+############################### Deafult Route
+ in file config/web.php 
+
+ 		section config add:  >> append at the end of config after params
+				'defaultRoute' => 'main/login',
+
+
+############################### CONTROLLER 
+
+<?php
+
+namespace app\controllers;
+use Yii;
+use yii\web\Controller;
+use yii\web\Response;
+
+class ProjectController extends \yii\web\Controller
+{
+
+    public function beforeAction($action)
+    {
+        if ( BOOL )
+        {
+            return parent::beforeAction($action);
+        }
+        else
+        {
+            return $this->redirect(["main/login"]);
+        }
+    }
+    
+        public function actionIndex()
+    { ... }
+    
+}
+   
+############################### Active Record
+
+*when not using asArray()->all() or all() it will returns the query
+*when using all() it will returns an array of objects
+*when using asArray()->all() it will return an arrray of associative arrays
+*when using scalar() it will return a variable only like string ot int
+
+* to see activeRecord query :
+		var_dump $dataProvider->query->createCommand()->sql;
+
+- query:
+	$pids = \app\models\ProjectMeta::find()->select("project_id")->where(['key'=>'view', 'value'=>"true"])->distinct();
+	$projects = \app\models\Projects::find()->where(['id'=>$ids])->orderBy(['ts'=>SORT_DESC]);
+	
+- where:
+	$query->where('status=1');
+	$query->where(['status' => 10, 'type' => null, 'id' => [4, 8, 15]]);
+	$query->where('status=:status')->addParams([':status' => $status]);
+	$query->where('status=:status', [':status' => $status]);
+	$query->where('YEAR(somedate) = 2015');
+	$query->where("status=$status");
+	
+- by sql:
+	$customers = Customer::findBySql('SELECT * FROM customer')->all();
+	
+- bigger than or smaller than:
+	Country::find()->where(['>=', 'population', $lower])->andWhere(['<=', 'population', $upper])->all();
+        
+          Table::find()->where(['>',['id' => '2']]->all();
+        
+        
+- query not in:
+	$chq = \app\models\PcChoices::find()->select('id')->where(['op_id'=>$op_id])->andWhere(['not',['id'=>$id]]);
+
+- update:
+	\app\models\PcRecords::updateAll(['op_value'=>$model->id], ['in','id', $records]);
+	
+	$project = \app\models\PcProjects::findOne($pid);
+	$project->project_weight = 100;
+	$project->update(false);
+	
+- save:
+	$model = new \app\models\PcOperations();
+	$model->project_id = $project['id'];
+	if(Yii::$app->request->isPost)
+	{
+		if($model->load(Yii::$app->request->post()))
+			{
+				if($model->save()){}
+			}
+	}
+
+############################ Data Provider
+it mainly supports retrieving paginated and sorted data.
+
+use yii\data\ActiveDataProvider;
+
+*Search Model can be created by CRUD in gii
+	$searchModel = new CustomersSearch();
+	$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+	$dataProvider->query->andWhere('customers.status = 10');
+
+$query = \app\models\BaseViewSubexSearch::find()->where(["district_id" => $districtId]);
+$dataProvider = new ActiveDataProvider(['query' => $query]);
+$dataProvider->query->andWhere(['not',['center_id' => null]]);
+$dataProvider->pagination->pageSize = 3;
+return $this->renderAjax('modals/ajax/searchSubInDistrict', ['dataProvider'=>$dataProvider, 'filterModel'=>$dataModel]);
+
+$dataProvider = new ActiveDataProvider(['query' => $query,'pagination' => ['pageSize' => 10]]);
+
+$dataModel = new \app\models\BaseViewSubexSearch();
+if (Yii::$app->request->queryParams)
+	{
+		$dataProvider = $dataModel->search(Yii::$app->request->queryParams);
+		$dataProvider->query->andWhere(['district_id' => $districtId]);
+	}
+    
+
+** get models from data provider
+	$model = $dataProvider->getModels();
+
+############################ Search model
+using crud to create search model
+search model "search" method starts to filter query based on query params
+we can modify search model like :
+	
+	        $query->andFilterWhere(["or", ['ilike', 'center_name', $this->center_name], ['ilike', 'name', $this->center_name]]);
+
+	        $query->andFilterWhere
+	        (
+		        ["or",
+		         ['ilike', 'center_name', $this->center_name],
+		         ['and', ['type'=>'center'],['ilike', 'name', $this->center_name]]
+		        ] 
+                  );
+                       
+                       
+############################ Return
+	
+	return $this->render("view", ['variable1'=>var1]); >> Layout+CSS+JS+view 
+	return $this->renderPartial("view", ['variable1'=>var1]); >> just HTML codes in view not css and js included inside the view
+	return $this->renderAjax("ajax/info", ['infoArray'=>$infoArray]); >> view and JS+CSS inside the view
+
+	* Controller::renderAjax() method can be used to respond to an Ajax request. This method is similar to renderPartial() except that it will inject into the rendering result with JS/CSS scripts and files which are registered with the view
+
+	
+	return $this->redirect(['project/view_record?eId='.$eId]); //send get param => queryParam
+	
+	return $this->redirect(['project/view_record', 'eId'=>$model->exchange_id,
+		"search[area]"=>$searchParams['area'],
+		"search[phaseNo]"=>$searchParams['phaseNo'] ,
+		"search[name]"=>$searchParams['name'],
+		"search[center_name]"=>$searchParams['center_name'],
+		"search[site_id]"=>$searchParams['site_id'],
+		"search[kv_code]"=>$searchParams['kv_code'],
+		"search[page]"=>$searchParams['page'],
+		"page"=>$searchParams['page']
+		]);
+		
+*get query params
+$qp = Yii::$app->request->queryParams;
+
+############################### Authentication
+
+- Configure the user application component.
+	*'components' => [ .... ,  'user' => ['identityClass' => 'app\models\User']],
+
+- Create a class that implements the yii\web\IdentityInterface interface. [user model must be indentity class]
+	* make user model like :
+
+		<?php
+
+			use yii\db\ActiveRecord;
+			use yii\web\IdentityInterface;
+
+			class User extends ActiveRecord implements IdentityInterface
+			{
+			    public static function tableName()
+			    {
+			        return 'user';
+			    }
+
+			    /**
+			     * Finds an identity by the given ID.
+			     *
+			     * @param string|int $id the ID to be looked for
+			     * @return IdentityInterface|null the identity object that matches the given ID.
+			     */
+			    public static function findIdentity($id)
+			    {
+			        return static::findOne($id);
+			    }
+
+			    /**
+			     * Finds an identity by the given token.
+			     *
+			     * @param string $token the token to be looked for
+			     * @return IdentityInterface|null the identity object that matches the given token.
+			     */
+			    public static function findIdentityByAccessToken($token, $type = null)
+			    {
+			        return static::findOne(['access_token' => $token]);
+			    }
+
+			    /**
+			     * @return int|string current user ID
+			     */
+			    public function getId()
+			    {
+			        return $this->id;
+			    }
+
+			    /**
+			     * @return string|null current user auth key
+			     */
+			    public function getAuthKey()
+			    {
+			        return $this->auth_key;
+			    }
+
+			    /**
+			     * @param string $authKey
+			     * @return bool|null if auth key is valid for current user
+			     */
+			    public function validateAuthKey($authKey)
+			    {
+			        return $this->getAuthKey() === $authKey;
+			    }
+			}
+		?>
+
+
+______________________
+
+// the current user identity. `null` if the user is not authenticated.
+$identity = Yii::$app->user->identity;
+
+// the ID of the current user. `null` if the user not authenticated.
+$id = Yii::$app->user->id;
+
+// whether the current user is a guest (not authenticated)
+$isGuest = Yii::$app->user->isGuest;
+
+// find a user identity with the specified username.
+// note that you may want to check the password if needed
+$identity = User::findOne(['username' => $username]);
+
+// logs in the user
+Yii::$app->user->login($identity);
+
+//logout
+Yii::$app->user->logout();
+
+
+
+
+
+############################### Athorization ACF
+Yii provides two authorization methods: Access Control Filter (ACF) and Role-Based Access Control (RBAC).
+
+1-ACF is a simple authorization method
+	While a user is requesting to execute an action, ACF will check a list of access rules to determine if the user is allowed to access the requested action.
+
+	? guest user
+	@ logged-in user
+
+	ACF checks one by one and from top to bootom
+	if nothig matches >> deny
+
+	use yii\web\Controller;
+	use yii\filters\AccessControl;
+
+	class SiteController extends Controller
+	{
+	    public function behaviors()
+	    {
+	        return 
+	        [
+	            'access' => 
+	            [
+	                'class' => AccessControl::class,
+	                'only' => ['login', 'logout', 'signup'], >>> ACF checks only for these actions
+	                'rules' => 
+	                [
+	                    [
+	                        'allow' => true,
+	                        'actions' => ['login', 'signup'],
+	                        'roles' => ['?'],
+	                    ],
+	                    [
+	                        'allow' => true,
+	                        'actions' => ['logout'],
+	                        'roles' => ['@'],
+	                    ],
+	                ],
+	                 
+	                'denyCallback' => function ($rule, $action) 
+	                    {
+        					throw new \Exception('You are not allowed to access this page');
+        			}
+
+	            ],
+	        ];
+	    }
+	    // ...
+	}
+
+
+
+Access rules support many options:
+
+	-allow: specifies whether this is an "allow" or "deny" rule.
+
+	-actions: specifies which actions this rule matches. This should be an array of action IDs. The comparison is  case-sensitive. If this option is empty or not set, it means the rule applies to all actions.
+
+	-controllers: specifies which controllers this rule matches. This should be an array of controller IDs. Each controller ID is prefixed with the module ID (if any). The comparison is case-sensitive. If this option is empty or not set, it means the rule applies to all controllers.
+
+	-roles: specifies which user roles that this rule matches. Two special roles are recognized, and they are checked via yii\web\User::$isGuest:
+    	?: matches a guest user (not authenticated yet)
+    	@: matches an authenticated user
+
+    - ips: specifies which client IP addresses this rule matches. An IP address can contain the wildcard * at the end so that it matches IP addresses with the same prefix. For example, '192.168.*' matches all IP addresses in the segment '192.168.'. If this option is empty or not set, it means this rule applies to all IP addresses.
+
+
+    -verbs: specifies which request method (e.g. GET, POST) this rule matches. The comparison is case-insensitive.
+
+    -matchCallback: specifies a PHP callable that should be called to determine if this rule should be applied.
+
+    -denyCallback: specifies a PHP callable that should be called when this rule will deny the access.
+
+############################### Authorization RBAC
+
+Role-Based Access Control (RBAC) provides a simple yet powerful centralized access control. 
+It provides the RBAC functionality through the authManager application component.
+
+Yii provides two types of authorization managers: yii\rbac\PhpManager and yii\rbac\DbManager. 
+
+	config/web.php
+
+	    'components' => [ 'authManager' => ['class' => 'yii\rbac\PhpManager', ], ],
+
+
+The authManager can now be accessed via \Yii::$app->authManager.
+
+*DbManager uses four database tables to store its data:
+
+    itemTable: the table for storing authorization items. Defaults to "auth_item".
+    	[we create roles here , name a role and data about it]
+    itemChildTable: the table for storing authorization item hierarchy. Defaults to "auth_item_child".
+    	[here we can set parent for a role. for example admin role is parent of role x and y (2 records) so admin can do x & y]
+    assignmentTable: the table for storing authorization item assignments. Defaults to "auth_assignment".
+    	[here we assign role to a user. ]
+    ruleTable: the table for storing rules. Defaults to "auth_rule".
+    
+    
+- auth_item:
+	-name [create_post]
+	-type [This should be either TYPE_ROLE (1) or TYPE_PERMISSION(2) .]
+	-description [users have this role can create role]
+	-rule_name [null]
+	-data [null]
+	-created_at[null]
+	-updated_at[null]
+	
+- auth_item_child
+	- parent [admin] [admin] (2 records >> so admin can create post and update_post)
+	- child  [create_post] [update_post]
+	
+- auth_assignment:
+	-item_name [create_post]
+	-user_id [1]
+	-created_at [null]
+
+- auth_rule:
+	-name
+	-data
+	-created_at
+	-updated_at
+	
+	    
+*** if tables has schema we need to configure the web.php as:
+
+	'authManager' => 
+	[
+            'class' => 'yii\rbac\DbManager',
+            'itemTable'=>"base.auth_item",
+            'itemChildTable'=>"base.auth_item_child",
+            'assignmentTable'=>"base.auth_assignment",
+            'ruleTable'=>"base.auth_rule",
+         ], 	
+	
+*** in the controller action we check:
+	if($Yii::$app->user->can("X"))
+	{
+	}
+	else 
+	{// forbidden
+	}
+    
+
+
+Before you can go on you need to create those tables in the database.
+	yii migrate --migrationPath=@yii/rbac/migrations
+
+*Building Authorization Data
+	-defining roles and permissions;
+	-establishing relations among roles and permissions;
+	-defining rules;
+	-associating rules with roles and permissions;
+	-assigning roles to users.
+
+
+* ـــــــــــــــ user
+
+file located in vendor/yiisoft/yii2/web/user.php
+add extra public functions for authorization:
+so 
+Yii::$app->user->canAccessArea($area = -1);
+...
+
+
+############################### Captcha
+
+change captcha controller:
+	/vendor/yiisoft/yii2/captcha:
+		Captcha.php >> change site/captcha to base/captcha
+			public $captchaAction = 'base/captcha';
+			
+		CaptchaValidator.php >> change site to base
+			public $captchaAction = 'base/captcha';
+			
+- change captcha font :
+	/vendor/yiisoft/yii2/captcha
+		change ttf file with the same name SpicyRice.ttf
+		
+- captcha image size color ... :
+	/vendor/yiisoft/yii2/captcha
+		edit CaptchaAction.php 
+		
+- captcha session makes captcha show the same during refresh
+	to change captcha on each refresh > in controller :
+		Yii::$app->session->destroy(); >>>>> but will destroy all session like flash!!
+		keep flash session 
+		
+	in controller befor render login:
+	        $flash = ""; $msg = "";
+	        if(Yii::$app->session->hasFlash('error'))  { $flash = "error"; $msg = Yii::$app->session->getFlash("error");}
+	        if(Yii::$app->session->hasFlash('success')){$flash = "success"; $msg = Yii::$app->session->getFlash("success");}
+	        Yii::$app->session->destroy();
+	        if(!empty($flash)) Yii::$app->session->setFlash($flash, $msg);
+
+############################### Error
+
+change error controller:
+	config/web.php >> site to base
+	   'errorHandler' => ['errorAction' => 'base/error'],
+	   
+
+in baseController set layout
+
+    public function actions()
+    {
+        return [
+            'error' => [
+                "class" => 'yii\web\ErrorAction',
+                "layout" =>"plain"    
+            ],
+            'captcha' => [
+                'class' => 'yii\captcha\CaptchaAction',
+            ],
+        ];
+    }
+
+############################### LOG
+
+in file config/web.php section log
+	'log' => [
+		  'traceLevel' => YII_DEBUG ? 3 : 0,
+		  'targets' => [
+		      [
+			'class' => 'yii\log\FileTarget',
+			'categories' => ['LOG'], // >> custome category 
+			'logVars' => [], // >> omit other parameters that automatically writes on the file
+			'exportInterval' => 1,
+			'logFile' => '@runtime/logs/pc_logs/pc.log', // >> path of the log file when it exceeds 10M it will split the file
+		      ],
+		  ],
+	        ],
+
+
+
+to write log :
+	$msg = "{"date":"1400-11-14(15:21)","ip":"127.0.0.1","user":null,"national_id":null,"title":"invalid_username_ip","desc":"user tried to log in "}";
+	
+	\Yii::info($msg, 'LOG');
+
+to change log format >>> vendor/yiisoft/yii2/log/target.php
+	function formatMessage($message)
+	{
+		return $message[0];	
+	}
+
+######################################################################## UI
+
+################################## Breadcrumbs
+
+in layout:
+	        <?= Breadcrumbs::widget([
+	            'itemTemplate' => "<li class='mr-2  text-secondary'>{link} / </li>\n",
+	            'activeItemTemplate'=>"<li class='mr-2 text-secondary'>{link} </li>\n",
+	            'homeLink' => [
+	                'label' => Yii::t('yii', ' پروژه‌های من '),
+	                'url' => Yii::$app->homeUrl,
+	            ],
+	        'options'=>['style'=>"direction:rtl;"],
+	            'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+	        ]) ?>
+
+in view:
+		$this->title = 'درباره ما';
+		$this->params['breadcrumbs'][] = ['label' => 'آمار', 'url' => ['login']];
+		$this->params['breadcrumbs'][] = ['label' => 'جدول آماری', 'url' => ['login']];
+		$this->params['breadcrumbs'][] = $this->title;
+-----
+$a = [];
+$a[] = "123"; >> appends to the array
+
+###################################  Alert
+
+        echo Alert::widget(['options' => [ 'class' => 'alert-danger text-right fixed-top w-75 mx-auto',],
+        				   'body' => Yii::$app->session->getFlash('error')
+        		       ]);
+
+use in layout too
+ Yii::$app->session->setFlash("error", "xyz");
+ 
+alert types:
+	'error'   => 'alert-danger',
+	'danger'  => 'alert-danger',
+      	'success' => 'alert-success',
+          'info'    => 'alert-info',
+          'warning' => 'alert-warning'
+ 
+ 
+################################## FORM
+
+<?php $form = ActiveForm::begin(
+[
+  'id' => 'login-form',
+  'options'=>["class"=>"w-100 bg-success p-0"],
+  'layout' => 'horizontal', // >> each div in a row
+  'fieldConfig' => [
+      'template' => "{label}\n{input}",//\n{error}
+      'labelOptions' => ['class' => 'col-md-2   col-form-label text-left bg-danger'],
+      'inputOptions' => ['class' => 'col-md-5   form-control text-left'],
+      'errorOptions' => ['class' => 'col-lg-5 invalid-feedback'],
+  ],
+]); ?>
+
+  <?= $form->field($model, 'natid')->textInput(['autofocus' => true]) ?>
+
+  <?= $form->field($model, 'auth_key')->passwordInput() ?>
+
+  <?= $form->field($model, 'verifyCode')->widget(Captcha::className(), [
+      'template' => '     <div class="col-md-9"><div class="row">
+                          <div class="col-md-4 bg-danger">{image}</div>
+                          <div class="col-md-8">{input}</div></div></div>
+                     ',
+  ]); ?>
+        
+        
+        ________________________ style fields label & input ... separately
+        
+$form = ActiveForm::begin([
+	'id'=>"projectsForm",
+	'method' => 'GET',
+	'action' => Yii::$app->request->baseUrl."/projects/edit_project",
+	'options'=>['style'=>'direction:rtl;max-width:400px;min-width:100px; overflow:auto; margin:auto',
+	       'onsubmit'=>"return checkDedication();"],]);
+
+ <?= $form->field($model, 'office', ['labelOptions'=>['style'=>"color:white;"]])->textInput(['placeholder' => "پروژه اداره کل"]); ?>
+
+$form->field($model, 'area', ['labelOptions'=>['style'=>'color:white;']])->dropDownList( $areas ,['value'=>-1,'onchange'=>"areaChanged(this)"]);
+
+$form->field($model, 'site_editable', ['labelOptions'=>['style'=>'color:white;']])->dropDownList([0=>'عدم امکان ویرایش' , 1=>'قابلیت ویرایش']); 
+            
+<?= $form->field($model, 'name', ['options'=>['style'=>'float:right; width: 50%;'],'labelOptions'=>['style'=>'color:white;']])->textInput(['maxlength' => true, 'style'=>"direction:rtl", 'placeholder' => "نام"]) ?>
+
+<?= $form->field($model, 'description',['labelOptions'=>['style'=>'color:white;']])->textarea(["row"=>2, 'option'=>['style'=>"direction:rtl;"]]); ?>
+        
+______ field
+
+<?= $form->field($model, 'FieldName',[DivOption & LabelOption])->widget([InputOption]); ?>
+<?= $form->field($model, 'natid',['options'=>['class'=>""], 'labelOptions'=>['class'=>""]])->textInput(['autofocus' => true, 'class'=>""]); ?>
+
+
+_______ Html helpers
+
+        <div class="row m-2">
+            <label for="peCB" class="col-md-4  text-right col-form-label  ">تجهیز</label>
+            <div class="col col-md-8 p-0">
+                <?= Html::dropDownList("peCB",null, $pe,['id'=>'peCB', 'onchange'=>"peChanged(this)", 'required'=>true, 'class'=>"w-100 form-control en-font"]); ?>
+                <h5 class="w-100 m-2 text-right text-secondary dir-rtl en-font" id="pe-desc"></h5>
+            </div>
+        </div>
+        
+        
+________ custom name
+
+        <?= $form->field($sd, 'quantity',['options'=>['class'=>"row m-2"], 
+        		'labelOptions'=>['class'=>"col-md-4   col-form-label text-right "]])
+        		->textInput(['autofocus' => true, 'name'=>'sd-quantity', 'type'=>'number', 'min'=>1, 'class'=>"col-md-8 form-control text-right en-font"]); ?>
+
+
+        
+
+_____ costum form neccessary field
+ 	<input type="hidden" name="<?= Yii::$app->request->csrfParam; ?>" value="<?= Yii::$app->request->csrfToken; ?>" />
+
+################################## IMAGE
+
+<?= Html::img('@web/images/logo.png', ['alt' => 'My logo']) ?>
+
+################################## ArrayHelper
+
+this class provides extra static methods
+
+* get value 
+	$array = ['foo' => ['bar' => new User()]];
+	$value = ArrayHelper::getValue($array, 'foo.bar.name');
+
+*set value
+	$array = ['key' => ['in' => ['k' => 'value']]];
+	ArrayHelper::setValue($array, 'key.in', ['arr' => 'val']); >> update
+	ArrayHelper::setValue($array, 'key.in.arr0.arr1', 'val'); >> new value
+
+*remove
+	$type = ArrayHelper::remove($array, 'type');
+
+*key existence
+	$val = ArrayHelper::keyExists('key1', $array, false); // false for case insensitive
+
+#retrieve column
+	$array = [
+    ['id' => '123', 'data' => 'abc'],
+    ['id' => '345', 'data' => 'def'],
+	];
+	$ids = ArrayHelper::getColumn($array, 'id');
+	 >> ['123', '345']
+
+
+################################## A
+
+<?= Html::a('Profile', ['user/view', 'id' => $id], ['class' => 'profile-link']) ?>
+
+##################################  gridView
+
+use yii\grid\GridView;
+
+Yii::$app->formatter->nullDisplay = ""; 
+
+  <?= GridView::widget([
+	    'options'=>["class"=>"dir-rtl"],
+	    'tableOptions'=>['id'=>"viewIntTable", 'class'=>'table table-striped table-bordered table-hover text-center'],
+	    'headerRowOptions'=>['class'=>'bg-warning text-center'],
+	    'summary'=>'', //'summary'=>'{begin}-{end}/{totalCount}',
+	    
+	    'rowOptions' =>
+	    	function ($model, $key, $index, $grid) 
+	    	{
+	    	  return [ 'id'=>'row'.$model['int_id'],
+	    		 'class'=>'table_row', 
+	    		 'onclick'=>'activateRow(this.getAttribute("id"));',
+	    		 'ondblclick'=>'modalShow(this.getAttribute("id"));',
+	    		 "oncontextmenu" =>"event.preventDefault();modalShow(this.getAttribute('id'));"];
+	    	},
+	    'dataProvider' => $dataProvider,
+	    'filterModel' => $searchModel,
+	    'columns' => 
+		    [
+		      [
+		        'attribute' =>'int_id',
+		        'visible'=>0,
+		        'headerOptions' => ['class' => 'bg-warning text-center'],
+		        'contentOptions' => ['class' => 'INT_ID'],
+		        'filterInputOptions' => ['placeholder' => 'جستجو'], // 'filterInputOptions' => ['class' => 'd-none'],
+		        'filter' => ['0' => 'تهران', '1' => 'بیت'],// to convert to combo box 
+		        'header'=>'xyz' >> this will change the header name but disables click sorting
+		        'value'=>function($model){return \app\components\Jdf::jdate("Y/m/d", $model->ts); },
+		        'format'    => 'raw', 
+
+		        // In which format should the value of each data model be displayed as (e.g. "raw", "text", "html", //		['date', 'php:Y-m-d']).
+		      ],
+		    ],
+
+		  ]);
+
+  ?>
+
+  * pass parameter to value function 
+  		       [
+                    'attribute' =>'weight',
+                    'value'=> function($model) use($projectWeight)
+                    { 
+                    	return \app\components\ProgressWidget::widget(["width"=>"80px", "height"=>"10px", "percentage"=>round(100*$model->weight/$projectWeight, 1)]); 
+                    },
+                    'format'    => 'html',
+                    'headerOptions' => ['class' => 'bg-secondary text-center'],
+                    'filterInputOptions' => ['class' => 'd-none'],
+                ],
+
+
+  
+  * Action column displays action buttons such as update or delete for each row.
+  
+      'columns' => [
+        [
+            'class' => 'yii\grid\ActionColumn', // update / delete / view
+            // you may configure additional properties here
+        ],
+        
+        ['class' => 'yii\grid\ActionColumn', 'template' => '{view} {update}'],
+        
+        
+   * Checkbox column displays a column of checkboxes.
+   
+       'columns' => [
+        // ...
+        [
+            'class' => 'yii\grid\CheckboxColumn',
+            // you may configure additional properties here
+        ],
+
+
+   * custom columns
+   	        'columns' =>
+            [
+                [
+                    'attribute' =>'ts',
+                    'headerOptions' => ['class' => 'bg-secondary text-center'],
+                    'value'=>function($model){return \app\components\Jdf::jdate("Y/m/d", $model->ts); },
+                    'filterInputOptions' => ['class' => 'd-none'],
+
+                ],
+                [
+                    'class' => 'yii\grid\ActionColumn',
+                    'template' => '{project_info}',
+                    'header'=>"اطلاعات پروژه",
+                    'buttons' => ['project_info' => function($url, $model, $key){ return "<a href=\"$url\"><i class='fa fa-info-circle text-info'></i></a>";}],
+                    'urlCreator' => function ($action, $model, $key, $index)
+                    {
+                        $url = Yii::$app->request->baseUrl.'/project/info?id='.$model->id;
+                        return $url;
+                    }
+                ],
+                [
+                    'class' => 'yii\grid\ActionColumn',
+                    'template' => '{project_detail}',
+                    'header'=>"جزییات پروژه",
+                    'buttons' => ['project_detail' => function($url, $model, $key){ return "<a href=\"$url\"><i class='fa fa-rectangle-list text-info'></i></a>";}],
+                    'urlCreator' => function ($action, $model, $key, $index)
+                        {
+                                $url = Yii::$app->request->baseUrl.'/project/detail?id='.$model->id;
+                                return $url;
+                        }
+                ],
+   
+   
+################################## DetailView
+
+use yii\widgets\DetailView;
+
+// The model can be either an instance of yii\base\Model or an associative array.
+
+        <?= DetailView::widget([
+          'model' => $model,
+          'attributes' => [
+            [
+              'label' => 'تصویر',
+              'value' => $model->product_img,
+              'captionOptions'=>['class'=>'text-right text-primary'],
+            ],
+            [
+              'label' => 'عنوان',
+              'value' => $model->product_title,
+              'captionOptions'=>['class'=>'text-right text-primary'],
+            ],
+            [
+              'label' => 'مبلغ به ارز',
+              'value' => $model->product_price." ".$model->currency,
+              'captionOptions'=>['class'=>'text-right text-primary'],
+            ],
+            [
+              'label' => 'مدت اعتبار محصول',
+              'value' => function($model)
+              	{
+              	 if($model->valid_month == 0) return "بدون اعتبار زمانی"; else return $model->valid_month." ماه";
+              	},
+              'captionOptions'=>['class'=>'text-right text-primary'],
+            ],
+            [
+              'label' => 'موجودیت محصول',
+              'value' => function($model)
+              	{
+              		 if($model->available == 0) return "ناموجود";
+              		 elseif($model->available == 1) return "به زودی";
+              		 else return "موجود";
+              	},
+              'captionOptions'=>['class'=>'text-right text-primary'],
+            ],
+          ],
+          ]) ?>
+
+
+
+################################## AJAX
+
+controller:
+	if (Yii::$app->request->isAjax) 
+	{
+	return $this->renderAjax('modals/search/searchInProvince', 
+			[
+				'searchModel' => $searchModel,
+				'dataProvider' => $dataProvider,
+			]);
+	}
+
+view:
+	use yii\widgets\Pjax;
+
+	Yii::$app->formatter->nullDisplay = "";
+	Pjax::begin(['id' => 'sipgw', 'enablePushState' => false]);
+	  
+	    <?= GridView::widget([
+	        'tableOptions' => ['class' => 'table table-striped  table-hover text-center'],
+	        'dataProvider' => $dataProvider,
+	        'filterModel' => $searchModel,
+	        //'summary'=>'',
+	        'columns' => 
+	        [
+		  [
+		      'attribute' => 'area',
+		      'headerOptions' => ['class' => 'text-center '],
+		      'contentOptions' => ['class' => 'text-center', 'style' => "vertical-align: middle;"],
+		  ],
+	        ],
+
+   	   ]);
+
+    Pjax::end();
+    ?>
+    
+
+
+################################## pagination
+
+controller:
+	use yii\data\Pagination;
+	use yii\data\ActiveDataProvider;
+
+	$model = new \app\models\ViewProducts();
+	$model = $model->find()->where(['cat_id'=>$cat_id])->orderBy("ts DESC");
+
+	$pages=new Pagination(['totalCount'=>($model->count())]);
+	$pages->pageSize=25;
+	$pages->pageSizeParam=false;
+	$pages->route = "#";
+	$model=$model->offset($pages->offset)->limit($pages->limit)->all();
+	return $this->renderAjax('products', ['cat_id'=>$cat_id, "model"=>$model, "pages"=>$pages]);
+      
+      
+view:
+
+
+    <?php
+	    echo \yii\widgets\LinkPager::widget([
+	      'pagination'=>$pages,
+	      'firstPageLabel'=>'صفحه اول',
+	      'lastPageLabel'=>'صفحه آخر',
+	      'nextPageLabel'=>'بعدی',
+	      'prevPageLabel'=>'قبلی',
+	      'maxButtonCount'=>5,
+	      'linkOptions'=>["href"=>"#", "onclick"=>"this.removeAttribute('href'); pageChanged(this.getAttribute('data-page'));"],
+	    ]);
+
+    ?>
+      
+ 
+ 
+ <?php
+$bUrl = Yii::$app->request->baseUrl;
+
+$js = <<<JS
+	 function pageChanged(page)
+	{ 
+	// for pagination by ajax
+	  id = document.getElementById("catSelectId").value;
+	  var prodDiv = document.getElementById("productDiv");
+	  if(id > 0)
+	  {
+	      $.ajax(
+	        {
+		url: "$bUrl/aghili/product/refresh_page",
+		type:"POST",
+		data:{"cat_id":id, "page":page},
+		success: function(data)
+		{
+		  prodDiv.innerHTML=data;
+		}
+	        }
+	      );
+	  }
+	  else
+	  {
+	    prodDiv.innerHTML = "<h4 class='text-primary text-center' >گروه و دسته بندی مورد نظر خود را انتخاب نمایید</h4>";
+	  }
+
+	  return false;
+	}
+
+JS;
+$this->registerJs($js, Yii\web\View::POS_END);
+?>
+
+
+
+
+
+################################## File Input
+
+view:
+
+    <?php $form = ActiveForm::begin(['options'=>['class'=>'wt_bg p5']]); ?>
+
+    <?= $form->field($model, 'cat_title', 
+    ['labelOptions'=>['class'=>'default-color']])->textInput(['maxlength' => true, 'placeholder'=>"نام گروه"]) ?>
+    
+    <?= $form->field($model, 'cat_country', 
+    ['labelOptions'=>['class'=>'default-color']])->textInput(['maxlength' => true, 'placeholder'=>"نام کشور"]) ?>
+    
+    <?= $form->field($model, 'country_flag', 
+    ['inputOptions' => ['value' => $model->country_flag], 'labelOptions'=>['class'=>'default-color']])->fileInput(); ?>
+    
+    <?= $form->field($model, 'cat_img', 
+    ['inputOptions' => ['value' => $model->cat_img], 'labelOptions'=>['class'=>'default-color']])->fileInput(); ?>
+    
+    <?= $form->field($model, 'cat_desc', 
+    ['labelOptions'=>['class'=>'default-color']])->textInput(['maxlength' => true, 'placeholder'=>"توضیحات"]) ?>
+
+    <div class="form-group">
+        <?= Html::submitButton('ذخیره', ['class' => 'btn btn-success pull-left']) ?>
+    </div>
+	<br class="cb" />
+    <?php ActiveForm::end(); ?>
+    
+    
+controller:
+	use yii\web\UploadedFile;
+
+*create new record:
+       $model = new \app\models\ProductCategories();
+
+        if ($model->load(Yii::$app->request->post()))
+        {
+          $img = UploadedFile::getInstance($model,"cat_img");
+          if(!empty($img))
+          {
+            $url= 'web/images/cats/'.time().'1.'.$img->extension;
+            $img->saveAs($url);
+            $model->cat_img= Yii::$app->request->baseUrl."/".$url;
+          }
+
+          $img = UploadedFile::getInstance($model,"country_flag");
+          if(!empty($img))
+          {
+            $url= 'web/images/cats/'.time().'2.'.$img->extension;
+            $img->saveAs($url);
+            $model->country_flag= Yii::$app->request->baseUrl."/".$url;
+          }
+
+          $model->set_id = $set_id;
+          if($model->save())
+            return $this->redirect(['index']);
+        }
+        
+
+*update record:
+
+      $model = $this->findModel($id);
+      $cat_img = $model->cat_img;
+      $country_flag = $model->country_flag;
+
+      if ($model->load(Yii::$app->request->post()))
+      {
+        $newImg = UploadedFile::getInstance($model,"cat_img");
+        if(empty($newImg))
+        {
+          $model->cat_img = $cat_img;
+        }
+        else
+        {
+          $url= 'web/images/cats/'.time().'1.'.$newImg->extension;
+          $newImg->saveAs($url);
+          $model->cat_img= Yii::$app->request->baseUrl."/".$url;
+          $bp = getcwd();
+          $old = $bp.$cat_img;
+          if(\file_exists($old) && $cat_img != "")
+              unlink($old);//remove old file
+        }
+
+        $newFlag = UploadedFile::getInstance($model,"country_flag");
+        if(empty($newFlag))
+        {
+          $model->country_flag = $country_flag;
+        }
+        else
+        {
+          $url= 'web/images/cats/'.time().'2.'.$newFlag->extension;
+          $newFlag->saveAs($url);
+          $model->country_flag= Yii::$app->request->baseUrl."/".$url;
+          $bp = getcwd();
+          $old = $bp.$country_flag;
+          if(\file_exists($old) && $country_flag != "")
+              unlink($old);//remove old file
+        }
+
+        if( $model->save() )
+          return $this->redirect(['index']);
+      }
+        
+       
+##################################
+##################################
+
+
+
+
+
+
+
+
+

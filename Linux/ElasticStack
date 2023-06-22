@@ -1,0 +1,115 @@
+###################### info
+
+at first the ELK Stack was a collection of three open-source products — Elasticsearch, Logstash, and Kibana — all developed, managed and maintained by Elastic. The introduction and subsequent addition of Beats turned the stack into a four legged project
+
+Elasticsearch is an open source, full-text search and analysis engine, based on the Apache Lucene search engine. Logstash is a log aggregator that collects data from various input sources, executes different transformations and enhancements and then ships the data to various supported output destinations. Kibana is a visualization layer that works on top of Elasticsearch, providing users with the ability to analyze and visualize the data. And last but not least — Beats are lightweight agents that are installed on edge hosts to collect different types of data for forwarding into the stack.
+
+######################  Installing Elasticsearch
+
+sudo apt-get update -y
+sudo apt-get install curl gnupg2 apt-transport-https unzip -y
+
+-----
+7.x
+wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add -
+sh -c 'echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" > /etc/apt/sources.list.d/elastic-7.x.list'
+
+-----
+8.x
+wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
+
+echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-8.x.list
+
+
+
+apt-get update -y
+apt-get install elasticsearch -y
+
+systemctl start elasticsearch
+systemctl enable elasticsearch
+
+systemctl status elasticsearch
+
+You can also verify the Elasticsearch using the command below:
+
+curl -X GET "localhost:9200/"
+
+###################### Configure Elasticsearch
+
+nano /etc/elasticsearch/elasticsearch.yml
+
+Change the following lines
+	cluster.name: my-cluster
+	network.host: 172.16.0.10
+	discovery.seed_hosts: 172.16.0.10
+
+systemctl restart elasticsearch
+
+ufw allow ssh
+ufw allow from 172.16.0.100 to any port 9200
+
+
+###################### Installing Logstash
+
+sudo apt-get install default-jre
+
+sudo apt-get install logstash
+
+###################### Installing Kibana
+
+sudo apt-get install kibana
+
+ /etc/kibana/kibana.yml:
+ make sure you have the following configurations defined:
+ server.port: 5601 elasticsearch.url: "http://localhost:9200"
+ 
+ sudo service kibana start
+ 
+ http://localhost:5601
+ 
+###################### Installing Beats
+data shipper
+beats type:
+	Filebeat
+	Packetbeat
+	metricbeat
+	Winlogbeat
+	Auditbeat
+	heartbeat
+	
+sudo apt-get install metricbeat
+sudo service metricbeat start
+
+
+sudo apt install filebeat
+sudo nano /etc/filebeat/filebeat.yml
+
+	#output.elasticsearch:
+	  #hosts: ["localhost:9200"]
+	…
+	output.logstash:
+	  hosts: ["localhost:5044"]
+
+enable system log
+	sudo filebeat modules enable system
+	
+	sudo filebeat modules list
+######################
+######################
+######################
+######################
+######################
+######################
+######################
+######################
+######################
+######################
+######################
+######################
+######################
+######################
+######################
+######################
+######################
+
+

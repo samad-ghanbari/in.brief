@@ -1,0 +1,12 @@
+RewriteEngine on
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule . index.php [L]
+
+#force https
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,NE,R=301]
+
+#Force www:
+RewriteCond %{HTTP_HOST} ^C.com [NC]
+RewriteRule ^(.*)$ https://www.C.com/$1 [L,R=301,NC]

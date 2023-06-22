@@ -1,0 +1,158 @@
+1- create folder named xx
+2- create file named xx.php (it must contains header and body)
+
+plugin infos are written in comment as standardized form as follows. some details are not mandatory.
+* HEADER
+			<?php
+
+			/*
+
+			Plugin Name: test_plugin
+
+			Plugin URI: https:// test.org/plugin...
+
+			Description: ...
+
+			Version: 1.0
+
+			Author: xyz
+
+			Author URI: https:// xyz.org/
+
+			License: GPL2
+
+			License URI: https://www.gnu.org/licenses/gpl-2.0.html
+
+			Text Domain: xyz
+
+			Domain Path:/languages
+
+			*/
+
+
+* BODY
+
+two important function :
+	add_action
+	add_filter
+
+defines where and which function must be run.
+
+for example:
+ 	add_action("init", "my_func"); // it means everywhere in every page run function my_func. my_func returns html code.
+ 				// init : everywhere |  admin_menu : in admin panel
+ 	function my_func()
+ 	{?>
+ 		<div></div>
+ 	<?php} ?>
+ 	
+=======================
+
+			function wpb_follow_us($content)
+			{
+
+				// Only do this when a single post is displayed
+
+				if ( is_single() )
+				{
+
+				// Message you want to display after the post
+
+				// Add URLs to your own Twitter and Facebook profiles
+
+				$content.= '<p class="follow-us">...</p>';
+
+				}
+
+				// Return the content
+
+				return $content;
+
+			}
+
+			// Hook our function to WordPress the_content filter
+
+			add_filter('the_content', 'wpb_follow_us');
+
+
+			?>
+
+
+
+########################################## DB connection
+mkdir /wp-content/plugins/db_test
+cd /wp-content/plugins/db_test
+touch db_test.php
+mkdir includes
+touch ./includes/db.php
+
+--- database global variables : $wpdb, $table_prefix
+
+gedit db_test.php
+	HEADER
+	...
+	BODY
+	include("/includes/db.php");
+	register_activation_hook(__FILE__, "create_table"); // when plugin activate, run the function create_table
+	
+gedit ./includes/db.php
+	function create_table()
+	{
+		global $wpdb, $table_prefix;
+		$table-name = $table_prefix."myTable";
+		// if table not exists
+		if($wpdb->get_var(show tables like $table_name) ! $table_name )
+		{
+			$sql = "create table ....";
+			
+			// these two line is neccessary 
+			require_once(ABPATH."wp_admin/includes/upgrade.php");
+			dbDelta($sql);	
+		}
+	}
+
+
+_________________________________________ ADD in admin menu
+ 	add_action("admin_menu", "my_func");
+ 	function my_func()
+ 	{
+ 		// add page and insert link in admin menu
+ 		add_menu_page("page name", "menu name", "access level like 'manage option' ", "url name-slug",
+ 			 "function name like 'adminXYZ' ", "menu icon name-search dashicon-like dashicon-games", "order menu number-int");
+ 	}
+ 	
+ 	function adminXYZ()
+ 	{
+ 		html...
+ 		form...
+ 		
+ 		if(isset($_POST['confirm_btn']))
+ 		{
+ 			global $wpdb, $table_prefix;
+			$table-name = $table_prefix."myTable";
+			
+			$wpdb->insert("myTable", ['id'=>2, 'name'=>'samad']);
+			
+ 		}
+ 		
+ 		// show table
+ 		
+ 		$results = $wpdb->get_results("select ...");
+ 		foreach($results as $row)
+ 		{
+ 		....
+ 		}
+ 	}
+
+
+
+##########################################
+predefined functions:
+
+https://codex.wordpress.org/Function_Reference
+
+	bool is_single(); // where display the single post in page or not
+
+	add_action("admin_notices", "my_func"); // run func output in upper notice bar. upper position div.
+
+	

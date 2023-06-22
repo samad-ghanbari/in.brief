@@ -1,0 +1,1792 @@
+######################## info
+
+node is written in C++
+V8 node javascript machine is written in c++
+
+ECMAscript is a standard thet javascript is based on it
+javascript engine: a program thet converts js code to machine code. each browsers has a javascript engine.
+
+- to use javascript to manage a server
+ 	better ways to organize our codes into reusable pieces
+ 	ways to deal with files
+ 	ways to deal with databases
+ 	ability to communicate over the internet
+ 	ability to accept req and send resp
+ 	ability to deal with works that takes long time
+ 	
+ 	>>> node.js does these things to us
+ 	
+
+javascript strict mode
+	"use strict";
+The "use strict" directive is only recognized at the beginning of a script or a function.
+Not Allowed in Strict Mode:
+		Using a variable, object, function, without declaring it, is not allowed
+		Deleting a variable, object or functions is not allowed.
+		Duplicating a parameter name is not allowed
+		The with statement is not allowed
+		Keywords reserved for future JavaScript versions can NOT be used as variable names in strict mode.
+			These are:
+			    implements
+			    interface
+			    let
+			    package
+			    private
+			    protected
+			    public
+			    static
+			    yield
+
+		
+	
+socket: simple and standard TCP/IP connection between two computers.
+web socket: a socket which keeps the connection opened.
+
+port: a number that maps to a program, when a packet recieves on a socket, according to its port, the packet delivers to the program.
+when a program listens to a port, actually the os maps that number to that program.
+
+MIME type: a standard for specifying the type of data being sent.
+like:    application/json, text/html, image/jpeg
+
+######################## install Node js
+
+download nodejs.tar.xz from nodejs.org
+extract as Nodejs
+sudo mv -r ./Nodejs /opt/
+sudo gedit /etc/environment
+	append:
+		PATH="....:/opt/Nodejs/bin";
+
+terminal:
+	node -v
+
+######################## functions
+- function statement
+	function greet()
+	{
+		console.log("hello");
+	}
+  greet(); // invoke|call function // () means run
+  
+  
+ - functions are first-class it means we can pass them around like variables
+   use functions like other types, pass them around, put in arrays .... 
+ 	function logGreeting(fn)
+ 	{
+ 		fn(); // run the given function
+ 	}
+   
+   logGreeting(greet); // function name without quotation
+   
+  - function expression
+  	var greetMe = function()
+  	{
+  		console.log("hi tony");
+  	}
+    greetMe();
+    logGreeting(greetMe); // it's first-class
+    
+  - function expression on the fly
+  	logGreeting( function(){console.log("hey tony"); } );
+
+######################## immidiately invoked function expression IIFE
+
+(function(){...} () );
+(function(lastname){...} ('ghanbari') );
+
+if we want to not effect unintenthionaly the code we can wrap it up:
+
+var a = 1;
+
+( function(){ var a = 2; .... }());
+
+console.log(a); // a:1
+######################## functions Constructor/inheritance/prototype
+
+function Person(firstname, lastname)
+{
+	this.firstname = firstname;
+	this.lastname = lastname;
+}
+
+Person.prototype.greet = function()
+{
+	console.log(this.firstname+' '+this.lastname);
+}
+
+var john = new Person('john', 'doe');
+john.greet();
+
+######################## by reference
+ >>> when i pass in an object >> pass by reference
+ >>> when pass number or string >> pass by value
+ 
+######################## HTTP
+hypertext transfer protocol
+	HTTP request
+	HTTP response
+
+HTTP Request
+	CONNECT www.google.com:443 HTTP/1.1
+	Host: www.google.com
+	Connection: keep-alive
+	
+HTTP Response
+	HTTP/1.1 200OK                       >> status
+	Content-Length: 44                   >> Header
+	Content-Type: text/html              >> Header
+	
+	<html><head> ... </head></html>      >> Body
+
+
+Content-Type: text/html  is MIME-Type
+MIME Multipurpose Internet Mail Extension
+	application/json  
+	text/html
+	text/plain
+	image/jpeg
+	
+
+######################## first app
+
+http.createServer(CALL_BACK).listen(8090);
+	
+create server.js
+
+	const http = require('http');
+	http.createServer(function(request, response)
+	{
+	 response.writeHead(200, 'Content-Type:text/plain');
+	 response.end("This is my fist app");             >>>> response for any URLs!
+	}).listen(8090);
+
+	console.log('server is running...'); 
+
+__
+in terminal run : node server.js
+open browser: localhost:8090
+
+######################## Array
+
+var arr = [];
+arr.push( STRING | NUMBER | FUNCTION ... );
+
+arr.push(function(){...});
+...
+arr.push(function(){...});
+
+arr.forEach( function(item){item()} );
+######################## REPL  READ EVAL PRINT LOOP
+environment to test node codes
+
+in terminal type node to enter repl
+twice CNTL+C or CNTL+D or .exit for quit repl
+
+commands:
+
+_: last value
+
+[1,2,3]
+_.length >>> 3
+
+
+_error.message  : last error
+
+.break or .clear : get out when you get stuck
+.editor : go to editor mode (CNTL+D to finish)
+
+.load  : to run app
+.load server.js
+
+.save : save all repl seesion command in a file
+
+example:
+const person = {name:'alice', cat:{name:'din'}};
+person           >>>  {name:'alice', cat:{name:'din'}}
+person.name      >>> alice
+person.cat.name  >>> din
+person.dog.name  >>> error
+
+person.?dog.name >>> undefined  >>> no error
+
+array = [1,2];
+array?.[2]   >>> undefined
+
+___
+
+nullish
+??
+ X ?? Y
+ if X is undefined or null it returns Y else returns X
+ 
+ 0 ?? 'abc' >>> 0
+ null ?? 'abc' >>> 'abc'
+___
+ 
+ OR
+ 0 || 'abc' >>> 'abc'
+ 
+######################## NVM
+Node Version Manager
+install different version of node in server
+nvm list >> shows all versions of node in system
+nvm install 14.0.0 >>> installs version 14.0.0
+...
+######################## Module
+-Core modules
+-Third Party Modules
+-Local Module
+
+each file considered as module.
+by require the module is run in the application and will be finished. it will not effect and remain in the rest of application. it is considered by design.
+if we want any function ... will be remain and be usable in the application, we must export them manually.
+WE SHOULD MAKE THEM AVAILABLE BY PURPOSE.
+
+when we talk about modules, we are not just talking about reusable blocks of code. we are talking about code that's protected.
+ 
+
+app.js
+mod1.js
+
+mod1.js:
+	let message = [1,2 3];
+	module.exports.msg = message; // exports.msg = message; >> by using exports we can access msg from app.js
+	
+app.js
+	const Message = require('./mod1.js');
+	console.log(Message.msg);
+	Message.msg.forEach(m => console.log(m));
+	
+	
+____
+
+module:
+	let person = {name:'samad', position: 'expert'};
+	exports.person = person;
+	
+app:
+	const per = require(module.js);
+	console.log(per.person.name);
+	
+######################## OBJECT JSON
+
+var person
+{
+	name: "samad",
+	lastname: "ghanbari",
+	greet : function() {...}
+}
+
+person.greet();
+
+person['name'];
+
+var john = Object.create(person);
+john.fistname = "john";
+john.lastname = "doe"
+console.log(john.greet());
+######################## exports vs module.exports
+
+exports need a property but module.exports can get no property
+module.exports.PROPERTY1={} is similar to exports.PROPERTY1={}
+
+module.exports = {person:{},  number: 12,  name: 'samad'} // exports json 
+module.exports = MyCLASS; // exports the class
+module.exports = myString; // exports the string
+
+exports.Class1 = CLS1; // exports { Class1:[class: CLS1] }
+exports.class2 = CLS2; // exports { Class1:[class: CLS1] , Class2:[class: CLS2] }
+
+	
+exports.person = {};
+exports.number = 12;
+exports.name = 'samad';
+	
+
+
+get multiple from module:
+module:
+	let name = 'samad';
+	const square = function(x){ return x*x; };
+	let number = 12;
+	
+in app:
+const {number, square, name} = require("./module.js");
+console.log(number);
+console.log(square(2));
+
+** if in a module:
+	exports.str1 = str1;
+	exports.str2 = str2;
+	module.exports = str3;
+on import module, it only contais str3
+
+** 
+	exports.str1 = str1;
+	exports.str2 = str2;
+	module.exports.str3 = str3;
+on import module, it contais {str1, str2, str3}
+
+######################## CLASS
+ 
+ class User 
+ {
+ 	constructor(name, lastname, location)
+ 	{
+ 		this.name = name;
+ 		this.lastname = lastname;
+ 		this.location = location;
+ 	}
+ 	
+ 	getinfo()
+ 	{
+ 		return this.name.' '+this.lastname;
+ 	}
+ }
+ 
+  class User extends EventEmitter
+ {
+ 	constructor(name, lastname, location)
+ 	{
+ 		super(); // call the EventEmitter constructor is necessary
+ 		this.name = name;
+ 		this.lastname = lastname;
+ 		this.location = location;
+ 	}
+ 	
+ 	getinfo()
+ 	{
+ 		return this.name.' '+this.lastname;
+ 	}
+ }
+ 
+ 
+ --- Static Class
+ 
+  class basic 
+ {
+ 	constructor(name, lastname, location)
+ 	{
+ 		this.name = name;
+ 		this.lastname = lastname;
+ 		this.location = location;
+ 	}
+ 	
+ 	static getinfo()
+ 	{
+ 		return this.name.' '+this.lastname;
+ 	}
+ }
+ 
+basic.getInfo(); // without instance creation
+
+######################## NPM Node Package Management
+npmjs.com
+
+npm i moment
+
+npm i jalali-moment
+var jm = require("jalali-moment");
+jm("2022/09/29", 'YYYY/MM/DD').locale('fa').format('YYYY/MM/DD');
+
+in the each location we run npm install ... the folder name node_modules and json file will created.
+
+node_modules       >> contains modules
+package.json       >> contains list of dependencies
+package-lock.json  >> contains all dependencies + urls with versions to avoid errors
+
+module1 >> installs >> it depends to mod1& mod2
+packege.json contains module1
+package-lock.josn contains: module1& mod1&mod2
+
+each module must contains a json file. this file is a complete information about that module.
+
+to generate json file for our own module we use:
+	npm init >>> asks questions
+	....
+	
+	npm init -y >> create json file with default values
+
+use npm install ...  in the project root folder.
+each project has its own modules.
+
+
+** install packe globally
+	npm install -g jalali-moment
+
+**  Install Certain Version globally
+	npm install -g jalali-moment@2.0.0
+	
+**  Update Packages 
+	npm update -g jalali-moment
+	
+**  Remove Packages globally
+	npm uninstall -g jalali-moment
+
+**  List Packages 
+	globally
+		npm -g list
+	locally
+		npm list
+** json contain two dependencies:
+	dependencies & devdependencies
+		dependencies needed in production
+		devdependencies needed in developement
+
+** Production dependency
+	npm install --save package-name   >>> install and update dependency in json file
+	npm update --save package-name
+	npm uninstall --save package-name
+** Development dependency
+	npm install --save-dev package-name  >>> install and update developement dependency in json file
+	npm update --save-dev package-name
+	npm uninstall --save-dev package-name
+
+** audition to know vulneribility
+	npm audit
+** to fix vulnerabilities
+	npm audit --fix
+	
+## when transmit program we can move our codes plus package.json & package-lock.json
+in new location run
+	npm install   >>> it installs all modules and dependencies and devdependencies
+	npm install --production  >>  Install production dependencies only not devdependencies.
+	
+* npm install >> installs from package.json
+* npms ci     >> installs from package-lock.json
+	
+
+VERSIONS:
+	MAJOR.MINOR.PATCH.BUILT
+	npm uses MAJOR.MINOR.PATCH
+	"*"         : Install package with latest version
+	"4.13.0"    : Install package with exact version
+	"~4.7.4"    : Install package with latest patch update 
+	"^4.5.6"    : Install package with latest minor update >>> when major changed it will not update
+	
+	
+	
+In the package.json there is section named script. there we can put our commands like:
+	"scripts":{
+		"dev": "node app.js", // or "dev" : "nodemon app.js"
+		"test": "Command1 && command2"
+	}
+	
+and in the terminal just type:
+	npm run dev
+
+######################## Nodemon
+
+nodemon is a tool that helps develop Node.js based applications by automatically restarting the node application when file changes in the directory are detected.
+
+globally:
+	npm install -g nodemon
+
+install nodemon as a development dependency:
+	npm install --save-dev nodemon
+	
+usage:
+	nodemon server.js
+
+######################## Common ECMA JS
+
+Node.js has two module systems: CommonJS modules and ECMAScript modules.
+
+The ES module format is the official standard format to package JavaScript code for reuse and most modern web browsers natively support the modules.Node.js, however, supports the CommonJS module format by default. CommonJS modules load using require(), and variables and functions export from a CommonJS module with module.exports.
+
+extensions of ECMA JS is mjs
+
+// addTwo.mjs
+function addTwo(num) {
+  return num + 2;
+}
+export { addTwo };
+
+// app.mjs
+import { addTwo } from './addTwo.mjs';
+console.log(addTwo(4));
+
+
+######################## Module Package Library Framework
+each file in node.js is called module
+multiple modules is called package
+multiple packages is called library
+multible library is called framework
+
+Module > Package >> Library >> Framework
+
+######################## Frameworks
+
+-next.js
+-express.js
+	You can use it for any enterprise-grade or browser-based app because of its robust routing, templating, security features, and error handling provisions
+-koa.js
+-Meteor.js
+-Socket.io
+	develops real-time applications like chat room applications, video conferencing apps, multiplayer games, and others
+-Nest.js
+-Sails.js
+-Total.js
+-Hapi.js
+-Feather.js
+-Loopback.js
+-Adonis.js
+-Derby.js
+
+
+
+######################## inquirer args vorpal commander
+by using these modules we can prompt to get value.
+
+######################## process
+The process object provides information about, and control over, the current Node.js process.
+
+console.log(process.env);
+process.stdout.write("enter value: ");
+process.stdin.on("data", (answer)=>{console.log(answer.toString()); process.exit();} );
+
+process.argv >> array of input variable for node ./app.js samad gh 
+
+process.cwd();
+returns the current working directory
+__DIRNAME
+console.log(process.cwd());
+console.log(__dirname);
+
+>>> cwd()      >> where the code called
+>>> __dirname  >> where the file is
+
+
+######################## .env
+to store variable in a separate file we use this module.
+
+npm install dotenv
+
+create file named  .env
+write our variable inside it.
+
+.env
+	DB_HOST = "10.10.20.31";
+	DB_NAME = 'mydb';
+	DB_PASS = '123';
+	
+app.js
+	require("dotenv").config();
+	console.log(process.env.DB_PASS);
+	
+
+######################## PATH
+
+const path = require("path");
+console.log(path.basename('a/b/c/d/e')); >>> returns last part  >> e
+console.log(path.basename('a/b/c/d/e.xls')); >>> returns last part  >> e.xls
+console.log(path.basename('a/b/c/d/e.xls', '.xls')); >>> returns last part without .xls extension  >> e
+
+console.log(path.dirname('a/b/c/d/e')); >> returns a/b/c/d
+
+console.log(path.extname('a/b/c/d/e.xls')); >>> .xls 
+
+format it gets dir-filename-fileextension and creates the full path
+in case :
+	we use base, command ignores the name and extension
+	we use dir, command ignores the root 
+
+console.log( path.format( {
+	dir: "/home/samad/apps",
+	name: "newApp",
+	ext: ".js"
+	} ));
+ it returns /home/samad/apps/newApp.js
+
+** parse
+console.log( path.parse("/home/samad/a/b/c/n.xls"));
+it returns:
+	{
+	  root: '/',
+	  dir: '/home/samad/a/b/c',
+	  base: 'n.xls',
+	  ext: '.xls',
+	  name: 'n'
+	}
+	
+######################## OS Core Module / server OS
+const os = require("os");
+console.log( os.EOL ); // end of line
+
+console.log( os.arch() ); //CPU architecture >> X64
+
+console.log( os.cpus() ); //Returns an array of objects containing information about each logical CPU core.
+const cpus = os.cpus();
+const num = (Array.isArray(cpus))? cpus.length : null;
+console.log(num); // cpu cores
+
+console.log(os.loadavg()); //Returns an array containing the 1, 5, and 15 minute CPU load averages.
+
+console.log(os.freemem());
+console.log(Math.round(os.freemem()/1024/1024/1024));
+
+console.log(os.platform);
+
+console.log(os.networkInterfaces())
+
+console.log(os.release());//operating system release
+console.log(os.totalmem());
+
+console.log(os.uptime()/3600); // on hour
+
+console.log(os.version());
+console.log(os.type()); // oprtating system
+
+######################## example
+// os
+const os = require("os");
+console.log(os.platform());
+const {platform} = os; // >> to get the function
+console.log(platform());
+const myPlatform = platform();
+const {exec} = require("child_process"); // get the exec function . exec to run command in host(shell)
+const args = process.argv.slice(2); // in array ["abc"]
+console.log(args);
+const [url] = args; // url is the content of the array  >> "abc"
+console.log(url);
+
+const WINDOWS_PLATFORM = "win32";
+const Linux_PLATFORM = "linux";
+
+
+if(url === undefined)
+{
+    console.log("enter the url: ...");
+    process.exit();
+}
+
+if(myPlatform === WINDOWS_PLATFORM)
+{
+    exec(`start chrome ${url}`);
+}
+else if(myPlatform === Linux_PLATFORM)
+{
+    exec(`firefox ${url}`);
+}
+
+######################## {}
+
+to get a function from a module
+	const {exec} = require("child_process"); 
+
+######################## URL - URI
+A URI or a uniform resource identifier is a string of characters that generally identifies any web resource by using a name, a location, or both. A uniform resource locator (URL) and a uniform resource name (URN) are the two types of a URI.
+
+URL:  https://hostinger.com.
+URI:  ISBN 0-476-35557-4.
+      mailto:hey.Doe@example.com
+      news:comp.infosystems.www.servers.unix
+      
+
+URI:
+	URN : name/number
+	URL : protocol+name/number
+	
+
+
+http://subdomain.domain.co.uk:8090/dir?r=12&s=32#seg
+Scheme:                 http://
+SubDomain:              subdomain
+Domain:                 domain
+TopLevelDomain:         .co.uk
+Port:                   8090
+SubDirectory/Path:      dir
+QueryStringSeparator:   ?
+QueryString/QueryParam: r=12&s=32
+section/fragment:       sec
+
+########################  module stability
+
+Stability number : 0~3
+0: depricated.   it is not guaranteed.
+1: experimental. may be changed or omit in the next release.
+2: stable.       it is ok.
+3: legacy.       it is not recommended. it is old and is going to be depricated.
+
+######################## URL
+
+├──────────┬──┬─────────────────────┬────────────────────────┬───────────────────────────┬───────┤
+│ protocol │  │        auth         │          host          │           path            │ hash  │
+│          │  │                     ├─────────────────┬──────┼──────────┬────────────────┤       │
+│          │  │                     │    hostname     │ port │ pathname │     search     │       │
+│          │  │                     │                 │      │          ├─┬──────────────┤       │
+│          │  │                     │                 │      │          │ │    query     │       │
+"  https:   //    user   :   pass   @ sub.example.com : 8080   /p/a/t/h  ?  query=string   #hash "
+│          │  │          │          │    hostname     │ port │          │                │       │
+│          │  │          │          ├─────────────────┴──────┤          │                │       │
+│ protocol │  │ username │ password │          host          │          │                │       │
+├──────────┴──┼──────────┴──────────┼────────────────────────┤          │                │       │
+│   origin    │                     │         origin         │ pathname │     search     │ hash  │
+├─────────────┴─────────────────────┴────────────────────────┴──────────┴────────────────┴───────┤
+│                                              href                                              │
+└────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+const url = new URL("https://user:pass@sub.example.com:8080/p/a/t/h?query=string#hash");
+console.log(url);
+
+URL {
+  href: 'https://user:pass@sub.example.com:8080/p/a/t/h?query=string#hash',
+  origin: 'https://sub.example.com:8080',
+  protocol: 'https:',
+  username: 'user',
+  password: 'pass',
+  host: 'sub.example.com:8080',
+  hostname: 'sub.example.com',
+  port: '8080',
+  pathname: '/p/a/t/h',
+  search: '?query=string',
+  searchParams: URLSearchParams { 'query' => 'string' },
+  hash: '#hash'
+}
+
+URLSearchParam Class:
+	var sp = new URLSearchParams("a=1&b=2&c=3");
+	console.log(sp); /// URLSearchParams { 'a' => '1', 'b' => '2', 'c' => '3' }
+	console.log(sp.toString()); // a=1&b=2&c=3
+	sp.append("d", 4);
+	sp.delete("a");
+	console.log(sp.get('b')); // 2
+	sp.set("c", "30");
+	console.log(sp); // URLSearchParams { 'b' => '2', 'c' => '30', 'd' => '4' }
+	
+
+const url = new URL("https://user:pass@sub.example.com:8080/p/a/t/h?query=string#hash");
+var query = url.searchParams.get("query);
+console.log(query); // string
+
+host: destination server
+origon: where the request sent
+
+>> coss origon error:  when host and origon are different
+
+
+>> entries
+var sp2 = new URLSearchParams("a=10&b=20&c=30");
+for(let j of sp2.entries())
+    console.log(j);
+    
+    	[ 'a', '10' ]
+	[ 'b', '20' ]
+	[ 'c', '30' ]
+
+######################## for in vs for of
+
+let params = {'a':1, 'b':2, 'c':3, 'd':4}; // for in
+for(let i in params)
+    console.log(i+' = '+ params[i]);
+
+	a = 1
+	b = 2
+	c = 3	
+	d = 4
+
+let par = {'a':1, 'b':2, 'c':3, 'd':4}; // for of
+console.log(Object.entries(par)); // [ [ 'a', 1 ], [ 'b', 2 ], [ 'c', 3 ], [ 'd', 4 ] ]
+for(let i of Object.entries(par))
+    console.log(i);
+    
+	[ 'a', 1 ]
+	[ 'b', 2 ]
+	[ 'c', 3 ]
+	[ 'd', 4 ]
+    
+_________
+The for…of loop iterates through the values of an iterable.
+The for…in loop iterates through the keys of an iterable. Iterating over arrays returns the item’s index.
+    
+let p = [ ['aa', 11] ,['bb', 22] ,['cc', 33],['dd', 44] ];
+for(let k in p) console.log(k);
+0
+1
+2
+3
+
+let a = ['a','b', 'c', 'd'];
+for(let k in p) console.log(k);
+
+
+console.log('\n');
+for(let k of p) console.log(k);
+
+[ 'aa', 11 ]
+[ 'bb', 22 ]
+[ 'cc', 33 ]
+[ 'dd', 44 ]
+
+______
+
+let a = ['a','b', 'c', 'd'];
+for(let k in a) console.log(k);
+for(let k of a) console.log(k);
+
+0
+1
+2
+3
+
+a
+b
+c
+d
+
+in: key-value
+of: item
+######################## global var let const
+
+name = 'samad'; >> defines as global and everywhere can be reached
+	global.name
+	name
+
+var name = 'samad'; >> local variable, defined in that module.
+
+let & const are local variables.
+
+***in browsers : var is global and let is local
+
+
+######################## this
+this in module points to nothing
+this in function poins to global object
+this in class points to that class.
+
+// this
+console.log(this) >> {}
+
+function aa(a)
+{
+    console.log(this);
+}
+aa(2); >> Object [global]
+
+class ab 
+{
+    constructor(){console.log(this)}
+}
+
+let b = new ab(); >> ab {}
+
+######################## call | apply for invoking functions
+
+in call or apply we can pass variable to it.
+
+var obj = 
+{
+   name: 'john doe',
+   greet: function(){ console.log(`hello ${ this.name }`);}
+}
+obj.greet(); // >>> hello john doe
+
+//call
+obj.greet.call({ name: 'jane';}); // this > to this obj
+//apply
+obj.greet.apply({name: ''jony});
+
+//difference
+...
+    greet: function(param1, param2){ console.log(`hello ${ this.name }`); ... }
+
+obj.greet.call({name: 'jane'} , param1, param2);
+obj.greet.apply({name: johy} , [param1, param2]);
+
+######################## event
+
+something that has happened in our app that we can respond to.
+events:
+	- system events: C++ Core : library Libuv  : events line file opened, finished reading, get file from internet, things that javascript does't have
+	
+	- custom events : javascript core: javascript library: event emitter: 
+
+____ event deployment
+
+emitter.js
+	function Emitter()
+	    {
+	      this.events = {}
+	    }
+	    Emitter.prototype.on = function(type, listener)
+	    {
+	      this.events[type] = this.events[type] || [];
+	      this.events[type].push(listener);
+	    }
+	    Emitter.prototype.emit = function(type)
+	    {
+	       if(this.events[type])
+	       {
+	          this.events[type].forEach( function(listener){ listener(); } );
+	       }
+	    }
+	    module.exports = Emitter;
+	    
+	    // {
+	    //   gotsomething: [ function(){} , function(){} ]
+	    // }
+
+app.js
+    var Emitter = require("./emitter");
+    var emtr = new Emitter();
+    emtr.on("greet", function(){console.log('1');});
+    emtr.on("greet", function(){console.log('2');});
+    console.log('hello');
+    emtr.emit('greet');
+
+_____ node events
+
+const Event = require("events");
+const myEvent = new Event();
+myEvent.on("samad", function(a,b,c){console.log(a+b+c)});  >> this points to the myEvent
+myEvent.on("samad", (a,b,c)=>{console.log(a+b+c)}); // arrow function >> in arrow function this points to outer this 
+myEvent.emit("samad", 1, 2, 3);
+
+>> 6
+
+____
+
+const myE = new Event;
+// multiple listener
+myE.on('samad', function(){console.log("123");});
+myE.on('samad', ()=>{console.log("456");});
+myE.on('samad', function(){console.log("789")});
+
+myE.emit("samad");
+
+myE.emit("gh"); //  no error/ no listener
+
+____
+myE.emit('error'); // generates error unhandled error
+                    // if we write lisener it will only returns the listener function
+
+handler that runs only once, at the first time
+myE.once("hi", ()=>{console.log('hi-1')});
+myE.once("hi", ()=>{console.log('hi-2')});
+myE.on("hi", ()=>{console.log('hi-3')});
+
+myE.emit('hi');
+myE.emit('hi');
+myE.emit('hi');
+myE.emit('hi');
+
+hi-1
+hi-2
+hi-3
+hi-3
+hi-3
+hi-3
+
+___ avoid misspelling 
+
+eventConfig.js
+	module.exports = 
+	{
+		events:{
+		GREET: 'greet',
+		}
+	}
+
+var eventConfig = require("./eventConfig");
+emtr.on(eventConfig.GREET, function(){});
+
+######################## Inherit - prototype chain
+
+function inheritance
+ by using module util we can inherit
+ 
+ var EventEmitter = require("events");
+ var util = require("util");
+ 
+ function Greetr(){ this.greeting = 'hello world'; }
+ util.inherits(Greetr, EventEmitter); //Greetr can access to on and emmit
+ Greetr.prototype.greet = function()
+ {
+   ....
+   this.emit('greet');
+ }
+ 
+ var greetr1 = new Greetr();
+ greetr1.on('greet', function(){});
+ 
+ + in inherit function when we inherit we just copy the prototype or structures not the values.
+ to access to the value we must call the constructor of the inherit function which is called supper constructor.
+ Person.call(this);
+ 	function Person(){....}
+ 	function Policeman(){ Person.call(this); ....} // here this can access the value of the Person
+ 	util.inherits(Policeman, Person);
+ 	
+ 
+
+######################## babeljs.io
+ES6 does not support in all browsers, if we use es6 we should use this lib to convert it to old js.
+
+ES6: like : var str = `hello ${ name } `   >>> 'hello' + name
+
+######################## Solid
+
+solid core
+try to solidate core section
+
+we have a class module which emits signals
+we have a events module which handles those signals
+
+CLASS:
+-db.js
+const EventEmmiter = require("events");
+class dbMan extends EventEmmiter
+{
+    actionOne(data)
+    {
+        console.log("action One was done!");
+
+        this.emit('NOTIFY', data);
+    }
+}
+module.exports = dbMan;
+___
+
+EVENTS:
+-appEvents.js
+function notifyMe(obj)
+{
+    obj.on('NOTIFY', (data)=>{console.log('action');console.log(data)});
+
+    obj.on('NOTIFY', (data)=>{console.log('next action');console.log(data)});
+
+}
+module.exports = notifyMe;
+___
+
+APP:
+-app.js
+const DbMan = require('./db');
+const dbMan = new DbMan();
+require('./appEvents')(dbMan); // send data to module
+dbMan.actionOne(
+    {
+        name:'samad',
+        lastname:'ghanbari'
+    }
+)
+######################## net
+
+socket: IP:Port
+
+const net = require('net');
+const server = net.createServer();
+server.listen(3000, '127.0.0.1',511, ()=>{
+    console.log('open on ', server.address());
+} );
+
+server.on('connection', ()=>{
+    console.log('New Connection!');
+});
+
+---
+
+socket connection from terminal :
+	socket 127.0.0.1 3000
+
+
+______________________
+
+const net   = require('net');
+const server = net.createServer();
+server.listen(3000, '127.0.0.1',511, ()=>{
+    console.log('server opened on %s port %s', server.address().address, server.address().port);
+} );
+
+server.on('connection', (socket)=>{
+    console.log('New Connection!');
+    // socket.write(`hello `+socket.remoteAddress+' port '+socket.remotePort);
+    socket.write( // send http response  >> space is important in response
+        `HTTP/1.1 200 OK
+Date: Sun, 10 Oct 2010 23:26:07 GMT
+Server: Apache/2.2.8 (Ubuntu) mod_ssl/2.2.8 OpenSSL/0.9.8g
+Last-Modified: Sun, 26 Sep 2010 22:04:35 GMT
+ETag: "45b6-834-49130cc1182c0"
+Accept-Ranges: bytes
+Content-Length: 12
+Connection: close
+Content-Type: text/html
+
+Hello world!`
+        );
+});
+
+
+
+browser: 127.0.01:3000 >> response: hello world
+######################## Socket send&Receive
+
+const net   = require('net');
+const server = net.createServer();
+server.listen(3000, '127.0.0.1',511, ()=>{
+    console.log('server opened on %s port %s', server.address().address, server.address().port);
+} );
+
+server.on('connection', (socket)=>{
+    console.log('Connected!');
+    // socket.write(`hello `+socket.remoteAddress+' port '+socket.remotePort);
+    socket.on('data', (output)=>{
+        console.log('output: ', output.toString());
+    });
+
+    process.stdin.on('data', (input)=>{
+        socket.write('input: '+ input.toString());
+    });
+
+    //when client disconnects
+    socket.on('end', ()=>{console.log('client is disconnected!')});
+
+    //when client run into error
+    socket.on('error', (err)=>{console.log(err.message)});
+});
+
+
+//terminal
+
+ socket 127.0.0.1 3000
+hello
+input: hi
+input: samad
+hamid
+input: ahmad nemat
+^X^C
+Interrupt occured, exiting
+
+
+######################## group socket
+const net   = require('net');
+const server = net.createServer();
+server.listen(3000, '127.0.0.1',511, ()=>{
+    console.log('server opened on %s port %s', server.address().address, server.address().port);
+} );
+
+let clients = [];
+
+server.on('connection', (socket)=>{
+    console.log('Connected!');
+    socket.id = null;
+    clients.push(socket);
+    socket.on('data', (output)=>{
+        for(let i in clients)
+        {
+            if(clients[i].remoteport === socket.remotePort ) continue;    
+            clients[i].write(output.toString());
+        }    
+    });
+
+    process.stdin.on('data', (input)=>{
+        socket.write('input: '+ input.toString());
+    });
+
+    //when client disconnects
+    socket.on('end', ()=>{console.log('client is disconnected!')});
+
+    //when client run into error
+    socket.on('error', (err)=>{console.log(err.message)});
+});
+
+######################## socket client
+const net = require("net");
+const socket = new net.Socket();
+socket.connect(3000,'localhost', ()=>{
+    console.log("socket was connected! from "+ socket.localAddress + ' port: '+ socket.localPort);
+});
+
+socket.on('data', (output)=>{
+    console.log(output.toString());
+});
+
+process.stdin.on('data', (input)=>{
+    socket.write(input.toString());
+});
+######################## Filesystem
+
+Common use for the File System module:
+
+    Read files
+    Create files
+    Update files
+    Delete files
+    Rename files
+
+-- read file
+
+There are two types of reading files. They are buffer and streams.
+Buffer reading
+    The entire file will be read first and then the content will be delivered.
+    Methods: readFile() and readFileSync().
+
+Stream reading
+    Instead of reading the entire file at a time, it gets and delivers by a small chunks. This makes it time efficient.
+    Methods: readStream()     
+
+
+*readFile is non-blocking async.
+*readFileSync is blocking sync.
+
+**readFile:
+const fs=require('fs');
+ fs.readFile('test.txt','utf-8',(err,data)=>{  //utf decoding to avoid binary code output.
+        if(err){
+            console.log(err);
+        }
+        else{
+            console.log(data);
+        }
+    });
+    console.log(" -->The end<-- ");
+
+>> output:
+'-->The end<--' 
+Lorem ipsum.
+
+
+**readFileSync
+const fs=require('fs');
+var contents = fs.readFileSync(__dirname + 'test.txt', 'utf8');
+var contents = fs.readFileSync('test.txt', 'utf8'); //utf decoding to avoid binary code output.
+console.log(contents);
+console.log(" -->The end<-- ");
+
+>>output:
+Lorem ipsum.
+'-->The end<--'
+    
+
+**server
+
+var http = require('http');
+var fs = require('fs');
+
+http.createServer( (req, res)=>{
+
+    fs.readFile('./index.html', (err, data)=>{
+        res.writeHead(200, {'Content-Type': 'text/html'});
+        res.write(data);
+        res.end();
+    } );
+} ).listen(3000);
+
+--
+
+
+using stream to improve performance:
+
+...
+res.writeHead(200, {'content-type': 'text/html'});
+fs.createReadStream(__dirname + 'index.html').pipe(res);
+
+---
+return json data
+
+http.createServer( (req, res)=>{
+
+	res.writeHead(200, {'Content-Type': 'application/json'});
+	var obj =
+	{
+		fitsname: 'john',
+		lastname: 'doe'
+	}
+	res.end(obj);
+	res.end(obj.toString());  >> result    [object object]   >> it is object not content
+	res.end(JSON.stringify(obj));  >> to string [obj>>string] r>> serializing data 
+        res.end();       
+        
+} ).listen(3000);
+
+
+Serialize: translating an object into a format that can be stored or transfered.
+JSON, CSV, XML ... serializing data
+
+Deserialise: converting the format back into an object
+
+
+Browser [json]> serialize ===========> Node    [deserialize] > get Object
+Node    [json]> serialize ===========> Browser [deserialize] > get object
+
+
+######################## Template
+
+Simple Way:
+text designed to be the basis for final text or content after being processed.
+there is some template language  >> replace placeholders >> generate final content.
+
+<html>
+	<head></head>
+	<body>
+		<H1> {Message} </H1>
+	</body>
+</html>
+
+
+...
+
+var html = fs.readFileSync(__dirname + '/index.html, 'utf8');
+var message = "Hello World";
+html.replace('{Message}', message);
+res.end(html);
+
+
+Template Engine:
+PUG EJS
+
+
+
+######################## stream
+stream is just a sequence of piece of data that is broken up what's called chunks.
+
+var readable = fs.createReadStream(__dirname + "file.txt" , {encoding: 'utf8', highWaterMark: 16*1024 } ); // highWaterMark : number of byte that we want our buffer size to be.
+
+readable.on('data', function(chunk) { console.log(chunk.length);} );
+
+++
+
+var writable = createWriteStream(__dirname + "file.txt" );
+readable.on('data', function(chunk) { writable.write(chunk);} ); // copy a big file
+
+######################## pipe
+conecting two streams by writing to one stream what is being read from another.
+
+readable stream > writable stream  
+
+var fs = require("fs");
+var readable = fs.createReadStream(__dirname+'/greet.txt');
+var writable = fs.createWriteStream(__dirname+/greetcopy.txt);
+readable.pipe(writable);
+
+var fs = require('fs');
+var zlib = require('zlib');
+var readable = fs.createReadStream(__dirname+'/greet.txt');
+var compressed = fs.createWriteStream(__dirname+/greet.txt.gz);
+var gzip = zlib.createGzip();
+readable.pipe(gzip).pipe(compressed);
+
+######################## route 
+
+manually routing:
+...  
+if(req.url === "/")
+{}
+else if(req.url === '/about')
+{}
+else
+{}
+but it is cumbersome
+routing is complecated better to use module.
+
+
+const http = require('http');
+const fs = require('fs');
+const url = require('url');
+
+http.createServer( (req, res)=>{
+
+    const urlParsed = url.parse(req.url);
+    console.log(urlParsed);
+    let html;
+    if(urlParsed.pathname == "/")
+        html = './index.html';
+    else if(urlParsed.pathname == "/about")
+        html = "./about.html";
+
+    fs.readFile(html, (err, data)=>{
+        res.writeHead(200, {'Content-Type': 'text/html'});
+        res.write(data);
+        res.end();
+    } );
+} ).listen(3000);
+
+######################## ESLint
+
+ESLint is a tool for identifying and reporting on patterns found in ECMAScript/JavaScript code, with the goal of making code more consistent and avoiding bugs.
+
+>install vscode extension eslint
+
+npm init @eslint/config
+
+we use standard style
+
+vscode autofix on save:
+	create ./.vscode/settings.json
+		{
+		    "editor.formatOnSave": true,
+		    "editor.codeActionsOnsave": 
+		    	{
+		    	   "source.fixAll": true
+		    	}
+		}
+	
+######################## Prettier
+
+ESLint syntax format
+Prettier Style Format conected with ESLint
+>install vscode extension
+
+npm install --save-dev --save-exact prettier
+echo {}> .prettierrc.json
+
+config with eslint:
+	npm install --save-dev eslint-config-prettier
+	
+Then, add "prettier" to the "extends" array in your .eslintrc.* file. Make sure to put it last, so it gets the chance to override other configs.
+
+	{
+	  "extends": [
+	    "standard",
+	    "prettier"
+	  ]
+	}
+
+style:
+
+.prettier.json:
+	{
+	    "trailingComma": "es5",
+	    "tabWidth": 4,
+	    "semi": false,
+	    "singleQuote": true
+	}
+  
+ >> to check style issues:
+ 	npx prettier --check .
+ 
+  
+######################## Promise
+~ call back function
+######################## Async
+
+######################## Express
+npm init 
+npm install express --save
+
+
+app.js
+	var express = require('express');
+	var app = express();
+	app.use(express.json()); // to get json from client
+	var port = process.env.PORT || 3000;
+	
+	app.get('/', function(req, res){
+		res.send( ' <html><body>Hello World</body></html>' );	 // express fill other necessary fields for respond message like content-type ...
+									// res.json > to send json
+		} );
+	
+	app.get('/api', function(req, res){ res.json({name:'samad'}) });
+	
+	app.get('/person/:id', function(req, res){ res.send('person'+id); }); // id can be anything
+	
+	app.listen(port);
+	
+######################## Middleware
+code that sits between two layers of softwares (between request & response)
+
+add folder: public
+create stylesheet:
+	/public/style.css
+		body{font-family: Arial, Helvetica, sans-serif;}
+
+//middleware
+app.use('/assets' , express.static(__dirname + '/public'));
+
+app.get('/', function(req, res){
+		res.send( '
+			<html>
+				<head> <link href=assets/style.css tyle=text/css rel=stylesheet> </head>
+				<body>
+					Hello World
+				</body>
+			</html>' );
+
+------
+use takes function
+
+app.use('/', function(req, res, next){
+	console.log('request.url: ' + req.url);
+	next();
+});
+
+when request received then middleware function (use) log the url and next function continues to send the respond
+
+custome middleware
+
+const logger = function(req, res, next)
+{
+	console.log('logg');
+	next();
+}
+app.use(logger); // if we put after function it will not be used. the location of moddleware is important
+app.get('/', function(req, res){
+	res.send('...');
+})
+
+from the location of middleware to the end, the middleware will be used.
+
+app.user(XYZ);
+app.get('/', function(req, res){});
+app.post('/user', function(req, res){});
+.
+
+if we want a middleware to be processed just for one specific route, instead of using app.use(); we use:
+
+app.get('/', MIDDLEWARE, function(req, res){})
+
+for multiple middleware:
+
+app.get('/', MIDDLEWARE1, MIDDLEWARE2, function(req, res){})
+
+
+######################## Error handling 
+we use middleware 
+
+app.use('/', router);
+.
+.
+.
+app.use(err, req, res, next)
+{
+	res.status(500).send('error');
+}
+
+
+
+app.use('/', router);
+.
+.
+.
+app.use( (req, res)=>{
+	res.status(404).send('page not found');
+} )
+
+######################## logger morgan 
+
+npm install morgan 
+
+const morgan = require('morgan');
+
+
+######################## Template and Template Engin
+there are a variaty of template engine that we can use with nodejs.
+all we have to do is:
+	npm install TEMPLATE_ENGINE_NAME --save
+	
+	app.js
+		app.set('view engine' , 'pug');
+		
+Javascript template engines:
+	-pug
+	-mustache
+	-ejs
+	-handlebars
+	-doT
+	-nunjucks
+	-underscore
+	
+npm install ejs --save
+
+app.js
+	app.set('view engine', 'ejs');
+
+create folder views in the root
+create file /views/index.ejs
+	<html>
+		<head>
+		</head>
+		<body>
+			<H1> <%= ID %> </H1>
+		</body>
+	</html>
+
+.. app.get('/person/:id', function(req, res){ res.render(index, {ID:req.params.id} )});
+
+######################## querystring
+
+localhost:3000/person/1?Qstr=123
+.. app.get('/person/:id', function(req, res){ res.render(index, {Qstr:req.query.Qstr} )});
+
+######################## urlencode
+URL Encoding (Percent Encoding)
+  URL encoding converts characters into a format that can be transmitted over the Internet.
+  URL encoding replaces unsafe ASCII characters with a "%" followed by two hexadecimal digits
+  utf-8 
+    space is 20 >> %20
+    S in persian is D8B5 >> %D8%B5
+    
+url :
+	localhost?r=ص 
+	will be encoded to:
+	  localhost?r=%D8%B5%20
+	  
+option:
+extended − This option allows to choose between parsing the URL encoded data with the queryString Library or the qs Library.
+
+app.use(express.urlencoded({ extended: false }));
+
+
+
+If extended is false, you can not post "nested object"
+
+person[name] = 'cw'
+
+// Nested Object = { person: { name: cw } }
+
+If extended is true, you can do whatever way that you like.
+
+
+
+######################## parse posted data
+
+middleware needed
+it's named is body-parser
+Parse incoming request bodies in a middleware before your handlers, available under the req.body property.
+when we post form, our information was included in the body, to get information we need to parse body(urlencodedParser).
+
+npm install body-parser --save
+
+...
+var bodyParser = require("body-parser");
+var urlencodedParser = bodyParser.urlencoded({extended: false});
+app.post('/login', urlencodedParser, function(req, res)
+{
+console.log(req.body.firstname); // urlencoded{arser parse the body and and get form info like firstname ...
+});
+
+
+---- for json parser
+
+var jsonParser = bodyParser.json();
+app.post('/person', jsonParser, function(req, res)
+{
+console.log(req.body.firstname);
+});
+
+######################## RESTFUL API - JSON
+
+REST: an architectural style for building an API
+REST : REpresentational State Transfer
+rest is a way of saying, let's standardise on a way of using the http request 
+having a RESTful api means that you design your API so that it responds to the HTTP request vers, the methos in the way that it's expected. (verbs: GET POST DELETE PUT)
+so:
+	follow a good URL structure
+	deal with HTTP methods
+	
+######################## Structuring an App
+install application skeleton
+	npm install express-generator -g
+	
+	express myapp
+	
+	cd myapp
+	npm install
+	
+.
+├── app.js
+├── bin
+│   └── www
+├── package.json
+├── public
+│   ├── images
+│   ├── javascripts
+│   └── stylesheets
+│       └── style.css
+├── routes
+│   ├── index.js
+│   └── users.js
+└── views
+    ├── error.pug
+    ├── index.pug
+    └── layout.pug
+    
+    
+    
+    
+######################## mysql
+
+npm install mysql --save
+
+...
+var mysql = require("mysql");
+var conn = mysql.createConnection({
+	host: "localhost",
+	user: "test",
+	password: "test",
+	database: ""addressbook
+});
+
+conn.query("QUERY", CALLBACK);
+conn.query("select ...", function(err, rows){- if(err) throw err; console.log(rows[0].firstname)});
+
+######################## MONGODB
+
+npm install mangoose --save
+
+var mangoose = require("mangoose");
+mangoose.connect("mangodb://USER:PASS@URL/DATABASE");
+
+var schema = mangoose.schema;
+var personSchema = new schema({
+	firstname: string,
+	lastname: string,
+	address: string
+});
+
+var Person = mangoose.model("Person", personSchema);
+var john = Person({
+	firstname: "john",
+	lastname: "doe",
+	address: ".."
+});
+
+john.save(function(err){ if(err) throw(err); });
+
+Person.find({}, function(err, users){...});
+
+
+######################## ORM
+
+npm install sequelize 
+npm install pg 
+
+######################## run app foreever
+
+npm install forever -g
+
+on servers:
+npm install pm2   // ***
+pm2 start app.js
+######################## authentication
+
+npm install passport 
+
+######################## FLASH
+npm install connect-flash
+
+######################## session
+npm install express-session
+
+######################## encript
+npm install bcrypt
+
+######################## validator
+npm install express-validator
+
+######################## mail
+
+npm install nodemailer
+########################
+########################
+
+
+
+
+
+
+
+
+
+
+
+

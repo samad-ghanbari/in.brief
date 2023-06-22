@@ -1,0 +1,201 @@
+install:
+	apt-get install git
+help:
+	git help X # git help add # git help stash
+config:
+	git config : global - system - local
+		global: /home/samad/.gitconfig
+		system: /etc/gitconfig
+		local: project_folder/.git/config
+	config:
+		git config --global user.name ‘Samad Ghanbari’ 
+		git config --global user.email ghanbari.samad@gmail.com
+		git config --global user.signingkey 703342ED490E34EBE5D30CFFB8788C9126285DE0
+		git config --global --list
+		git config --global --edit
+start:
+	git init
+	
+to init git with initial branch name:
+	git init --initial-branch=main
+	git init -b main
+	
+status:
+	git status
+add to stage:
+	git add a.txt 
+	git add .
+	git add -A 
+remove from stage:
+	git rm --cached ab.txt
+	git reset HEAD a.txt
+
+commit:
+	git commit -m "hello inserted"
+	git commit -am "file changed"   # add&commit but not for new files
+
+remove file from git(files added to git to track):
+	git rm -f filename        # to force removal
+	git rm --cacked filename  # to keep the file
+
+log:
+	git log
+	git log –-oneline 
+	git log --until=22:39:39
+	git log –-before=22:39:39
+	git log –-since=Jun--16--2023
+	git log –-author=”Samad Ghanbari”
+	git log –-grep=modify 
+	git log –-graph
+	git log -–reverse 
+	git log -L 5,8:a.txt 
+	git log BRANCH_B1
+
+show:
+	git show a48aa75d287bc1598fe8f1461c1259141a85db11
+	git diff HEAD
+	git diff --staged
+	
+go back to a commit-ID(without doing commit):  
+	git reset --hard COMMIT-ID   # deleting files  # dangerous# cannot return back
+	git reset --soft COMMIT-ID   # keeping files in stage
+	
+revert back the last commit(to cancel the last commit): 
+	git revert HEAD # creates a new commit
+
+cancel modification:
+	git checkout -- a.txt
+
+branch:
+	git branch    
+	git branch -r # git branch --remote
+	git branch -a # git branch --all
+
+create branch:
+	git branch bugfix
+	git checkout -b newBranch  
+	git branch -m master main  # move
+	git branch -c main newCopy # copy
+
+switch branch:
+	git checkout bugfix
+	git checkout v1.0.
+
+merge:
+	Fast-Forward
+	Recursive
+	Octopus
+	
+	git merge bugfix
+	git merge  --no-ff bugfix
+	git merge b1 b2 b3 
+
+remove branch:
+	git branch -d bugfix
+
+.gitignore:
+	images/*.jpeg
+	!images/logo.jpeg
+
+clone: 
+	git clone https://xyz/a/b/c/d.git 
+
+remote:
+	git remote add origin http://aaa/bbb/a.git
+	git remote rename origin test 
+	git remote # git remote -v 
+	git remote set-url test http://...
+	git remote remove origin 
+	How canHow can I create a Git repository with the default branch ...How can I create a Git repository with the default branch ... I create a Git repository with the default branch ...
+to push to remote add public ssh-key to github ssh authentication:
+	ssh-keygen 
+ 	gedit /home/samad/.ssh/id_rsa.pub 	
+	
+push/pull/fetch:
+	git push origin master
+	git push -u origin master
+	git pull origin master
+	git -f origin main-  # to force to replace # push to same branch
+
+	git fetch test # remoteName/branch
+	git merge RemoteTest/Origin 
+
+
+tags:
+	git tag
+	git tag -a ver1.0.0 -m “the first stable version of the project”
+	git tag  v0.1 COMMIT-ID -m “beta version”
+	git tag 2.0.0
+	remove tag:
+	git tag -d 2.0.0
+	tag list:
+	git tag -l “v2*”
+	show tag:
+		git show v2.0
+		git push origin --tags
+		
+	git checkout v1.0.
+
+Signature:
+	gpg –-list-keys
+	gpg --list-secret-keys --keyid-format LONG
+	gpg –-gen-key
+	gpg --full-gen-key
+	gpg –-delete-keys  KEY-ID  # gpg –-delete-secret-keys  KEY-ID
+	gpg –-delete-secret-and-public-keys  KEY-ID
+
+	gpg –-export KEY_ID  > mykey
+	gpg –-import mykey
+
+	git config --global user.signingkey 703342ED490E34EBE5D30CFFB8788C9126285DE0
+
+TAG and SIGN:
+	git tag -s v3.0 -m “new tag”
+	git show v3.0
+
+verify:
+	git -v v3.0
+
+Commit with signature:
+	git commit -S -m “new commit”
+	git show –show-signature COMMIT_ID
+
+
+BLAME:
+	Git blame a.txt -L5
+	Git blame a.txt -L5,8
+
+BISECT:
+	start
+	good
+	bad
+
+
+STASH:
+	git stash save MESSAGE
+	git stash push 
+	git stash push -m “B1-d”
+
+	git stash list
+
+	git stash pop Stash_Num  
+	git stash apply Stash_Num
+	git stash drop Stash_Num 
+
+Cherry-pick:
+	Git cherry-pick COMMIT-ID 
+	Git cherry-pick COMMIT-ID -e 
+	Git cherry-pick COMMIT-ID -n  
+
+# Add repository github:
+	- add repo in git hub
+	- local folder:
+		git init -b main
+	- git remote add origin git@github.com:samad-ghanbari/Qt-TableView-Header.git
+	- git pull git@github.com:samad-ghanbari/Qt-TableView-Header.git
+	- git add .
+	- git commit -m "TableView Widget header file created"
+	- git push origin main
+	
+	
+

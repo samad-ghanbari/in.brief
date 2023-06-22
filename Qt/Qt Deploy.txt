@@ -1,0 +1,68 @@
+######################## Qt Application Installer For Windows
+
+1-compile source code in release mode
+
+2-copy the .exe that is generated from compile file to new location
+
+3-in the directory: shift+right click and open CMD 
+
+4-run windeployqt.exe c:\desktop\xx.exe (this command will gather all necessary dll (except our libmysql.dll))
+
+5-in case of using mysql, copy libmysql.dll file in the root of that directory. (C:\Qt\Qt5.10.1\5.10.1\mingw53_32\bin\libmysql.dll)
+
+6-open inno setup compiler
+
+7-select create new script with wizard
+
+8-go on and give .exe file and include the folder
+
+9-target computer must have microsoft visual C++ redistributable package.
+
+
+##################### Qt Application Installer For Linux 
+
+1-Please download linuxdeployqt-x86_64.AppImage from the Releases page and chmod a+x it.
+	https://github.com/probonopd/linuxdeployqt/releases
+	
+	version 5 works fine
+	
+	rename the release to linuxdeployqt and copy to /usr/share/bin
+	
+2-Usage: linuxdeployqt <app-binary|desktop file> -appimage -bundle-non-qt-libs -qmake=<path<default in case ommited>> 
+		(linuxdeployqt takes an application as input and makes it self-contained by copying in the Qt libraries and plugins that 			the application uses.)
+		
+	└── usr
+	    ├── bin
+	    │   └── your_app
+	    ├── lib
+	    └── share
+	        ├── applications
+	        │   └── your_app.desktop
+	        └── icons
+		  └── <theme>
+		      └── <resolution> 
+		          └── apps 
+		              └── your_app.png
+                        
+3- create folder for example danet and copy the binary named DaNet there.  
+4- copy the icon named danet.png to the folder             
+5- create danet.desktop file containing (for icon no need to enter the extension):
+
+[Desktop Entry]
+Type=Application
+Name=DaNet
+Exec=AppRun %F
+Icon=danet
+Comment=Data Network Planning
+Terminal=true
+         
+6- go to the directory danet and run the below commands to create the appimage
+	
+	export PATH=/opt/Qt/5.15.2/gcc_64/bin/:$PATH
+	linuxdeployqt ./Danet -appimage
+	
+	
+#######################################
+                        
+	
+

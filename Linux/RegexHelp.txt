@@ -1,0 +1,35 @@
+--------------------------------------------------------
+			Regex
+        	Regular Expression
+
+"test"				matches with any test in sentence and word like: test, testtt, tttest ...
+^				start of sentence
+$				end of sentence
+"^test"				matches with any word starting test  like:  testy, testttt
+"^test$"			matches with test only
+.				any single character
+"^tes.$"			matches with any tesX which X can be any character like: test, tess, tesb ...
+/				scape , it means nake next character literal \. > . 
+"^test\.$"			matches with test.
+[]				character class, one of these given character, - means to
+[3,4,5]				means one of 3 or 4 or 5 , ONE CHARACTER
+[1-9]				means 1 to 9
+\d				matches 1 to 9
+[A-Z]				means one of character A to Z
+"^te[s,S,m]t$"			matches with test, teSt, temt
+{n}				repeat counter
+{n,m}				repeatable minimun n and maximum m times
+{n,}				minimum of n times 
+{,m} 				maximum of m times
+{0, n}				minimum 0 and maximum n
+*				equals {0,}
++				equals {1,} means minimum one time  and no max limitation
+?				equals {0,1}, optional character
+"^tes[t,T]{1,2}"		matches with test, tesT , testT, tesTT, ...
+"^test*$"			matches with test, tes, testttttt
+"^test+$"			matches with test, testttttt 
+"^testt?$"			matches test, testt
+"^[2-8]{4}$"			matches with 2345, 3456, 3456, ...
+"^a{3}$"			matches aaa
+(X|Y)				OR
+"(samad | ahmad)"		matches samad, ahmad

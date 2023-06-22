@@ -1,0 +1,626 @@
+	Sass stands for Syntactically Awesome Stylesheet
+
+* Sass files has the ".scss" file extension. 
+
+############################## install node.js
+sass is base on node.js >> npm is needed 
+in the past sass was based on ruby
+
+sudo apt update
+sudo apt install nodejs npm
+
+sudo npm install -g sass
+
+##############################  Compass framework
+
+compass is based on ruby
+
+sudo apt-get install ruby-full
+
+sudo gem install compass
+
+############################## scout UI
+download app image from:
+https://scout-app.io/
+extract it
+
+sudo mv ./Scout-App/ /usr/local/share/
+
+create Scout.desktop file:
+
+	[Desktop Entry]
+	Version=2.18.16
+	Encoding=UTF-8
+	Type=Application
+	Name=ScoutApp
+	Comment=Scout App
+	NoDsiplay=true
+	Exec=/usr/local/share/Scout-App/Scout-App %f
+	Icon=/usr/local/share/Scout-App/scout-files/_img/logo_512.png
+	Name[en_US]=Scout-App
+
+move desktop file to 
+	/usr/local/share/applications
+	
+sudo chmod 755 ./applications/Scout.desktop
+sudo chmod 755 ./Scout-App/ -R
+
+libgconf needed >> install by package manager
+
+################################# Project default folders and file
+
+- modules >> save mixins and functions
+- partials >> partials scss files starting with _ 
+- vendor >> libs 
+- sass.scss >> sass file
+
+################################ Command
+
+ sass main.scss main.css 
+  sass main.scss main.css --style compressed
+ 
+ sass --watch main.scss:main.css
+ 
+################################# Variables
+
+$variablename: value; 
+
+$myFont: Helvetica, sans-serif;
+
+-SCOPE
+
+$myColor: red;
+h1 {
+  $myColor: green;
+  color: $myColor; >>> green color
+}
+p {
+  color: $myColor; >>> red color
+}
+
+############################### operations
+ 
+ $font-size = 20px - 5px;
+ 
+ $fontSize = 2px * 2;
+ 
+ $fontSize = (10/4); >> () for operation 
+ 		 >> 10/4 considers as string
+
+
+################################# @if @else
+
+@if ( ($a == 1) or  (@b == 2 ) )
+{...}
+@else 
+{...}
+
+
+################################# Nesting
+
+Sass lets you nest CSS selectors in the same way as HTML.
+
+nav {
+  ul {
+  ...
+  }
+}
+
+outputs:
+nav ul {...}
+
+___
+
+text: {    >>>> : important
+  align: center;
+  transform: lowercase;
+  overflow: hidden;
+}
+
+outputs:
+text-align: center;
+text-transform: lowercase;
+text-overflow: hidden; 
+
+##################################   &
+
+The & is an extremely useful feature in Sass (and Less). It’s used when nesting.
+
+.some-class {
+  &.another-class {}
+}
+
+.some-class.another-class { }
+
+------
+
+.parent {
+  & .child {}
+}
+
+.parent .child {}
+
+-----
+
+.button {
+  &:visited { }
+  &:hover { }
+  &:active { }
+}
+
+-----
+
+.button {
+  & > span { }
+  & + span { }
+  & ~ span { }
+}
+
+.button {
+  > span { }
+  + span { }
+  ~ span { }
+}
+
+
+.button > span { }
+.button + span { }
+.button ~ span { }
+
+------
+
+.button {
+  body.page-about & { }
+}
+
+body.page-about .button {}
+
+-------
+.parent {
+  &#{&} { }
+}
+
+.parent.parent {}
+
+
+
+################################# @at-root
+
+.grand-parent {
+  .parent {
+    @at-root .child {}
+  }
+}
+
+.child {}
+
+
+
+
+################################## @import
+
+The @import directive allows you to include the content of one file in another.
+
+@import filename; 
+
+
+*** Sass Partials
+* a partial Sass file is named with a leading underscore ( _ )
+* scss files starting with _ does not transpiles directly.
+* on @import we can ommit _ 
+
+_colors.scss
+main.cscc
+	@import "colors"
+
+################################### @mixin   @include
+
+The @mixin directive lets you create CSS code that is to be reused throughout the website.
+
+The @include directive is created to let you use (include) the mixin.
+
+@mixin name {
+  property: value;
+  property: value;
+  ...
+}
+
+selector {
+  @include mixin-name;
+}
+
+********   pass variables / default value 
+@mixin bordered($color, $width: 1px) {
+  border: $width solid $color;
+}
+
+.myArticle {
+  @include bordered(blue);  // Call mixin with one values
+}
+
+.myNotes {
+  @include bordered(red, 2px); // Call mixin with two values
+}
+
+#################################  @function
+
+@function sum($num1 , $num2)
+{
+	@return ($sum1 + $sum2);
+}
+
+#################################   @for
+
+@for $i from 1 through 10 
+{
+	...
+}
+
+################################ @while
+
+$i:1;
+@while $i < 6 
+{
+...
+ $i : $i + 1;
+}
+
+################################# @each 
+
+$icons : $a $b $c;
+
+@each icon in $icons
+{
+	...
+}
+
+$icons : (a:"aaa", b: "bbb", c:"ccc");
+each $key, $value in $icons
+{
+}
+
+################################# @extend
+
+The @extend directive lets you share a set of CSS properties from one selector to another. 
+
+.button-basic  {
+  border: none;
+  padding: 15px 30px;
+  text-align: center;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.button-report  {
+  @extend .button-basic;
+  background-color: red;
+}
+
+.button-submit  {
+  @extend .button-basic;
+  background-color: green;
+  color: white;
+}
+___________
+
+outputs:
+.button-basic, .button-report, .button-submit {
+  border: none;
+  padding: 15px 30px;
+  text-align: center;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.button-report  {
+  background-color: red;
+}
+
+.button-submit  {
+  background-color: green;
+  color: white;
+}
+
+
+#################################  Sass String Functions
+
+quote(Hello world!)
+Result: "Hello world!"
+
+str-index("Hello world!", "H")
+Result: 1
+
+str-insert("Hello world!", " wonderful", 6)
+Result: "Hello wonderful world!"
+
+str-length("Hello world!")
+Result: 12
+
+str-slice("Hello world!", 2, 5)
+Result: "ello"
+
+to-lower-case("Hello World!")
+Result: "hello world!"
+
+to-upper-case("Hello World!")
+Result: "HELLO WORLD!"
+
+unique-id()
+Result: tyghefnsv
+
+unquote("Hello world!")
+Result: Hello world!
+
+###################################   Sass Numeric Functions
+
+abs(15)
+Result: 15
+abs(-15)
+Result: 15
+
+
+ceil(15.20)
+Result: 16
+
+
+comparable(15px, 10px)
+Result: true
+comparable(20mm, 1cm)
+Result: true
+comparable(35px, 2em)
+Result: false
+
+
+floor(15.80)
+Result: 15
+
+
+max(5, 7, 9, 0, -3, -7)
+Result: 9
+
+
+min(5, 7, 9, 0, -3, -7)
+Result: -7
+
+
+percentage(1.2)
+Result: 120
+
+
+random()
+Result: 0.45673
+
+
+random(6) // Returns a random integer between 1 and number.
+Result: 4
+
+
+round(15.20)
+Result: 15
+round(15.80)
+Result: 16
+
+
+###################################  Sass List Functions
+
+** index starts from 1
+
+append((a b c), d)
+Result: a b c d
+append((a b c), (d), comma)
+Result: a, b, c, d
+
+
+index(a b c, b)
+Result: 2
+index(a b c, f)
+Result: null
+
+
+is-bracketed([a b c])
+Result: true
+is-bracketed(a b c)
+Result: false
+
+
+join(a b c, d e f)
+Result: a b c d e f
+join((a b c), (d e f), comma)
+Result: a, b, c, d, e, f
+join(a b c, d e f, $bracketed: true)
+Result: [a b c d e f]
+
+
+length(a b c)
+Result: 3
+
+
+list-separator(a b c)
+Result: "space"
+list-separator(a, b, c)
+Result: "comma"
+
+
+nth(a b c, 3)
+Result: c
+
+
+set-nth(a b c, 2, x)
+Result: a x c
+
+
+zip(1px 2px 3px, solid dashed dotted, red green blue)
+Result: 1px solid red, 2px dashed green, 3px dotted blue
+
+
+#####################################   Sass Map Functions
+
+In Sass, the map data type represents one or more key/value pairs.
+
+$font-sizes: ("small": 12px, "normal": 18px, "large": 24px)
+map-get($font-sizes, "small")
+Result: 12px
+
+
+$font-sizes: ("small": 12px, "normal": 18px, "large": 24px)
+map-has-key($font-sizes, "big")
+Result: false
+
+
+$font-sizes: ("small": 12px, "normal": 18px, "large": 24px)
+map-keys($font-sizes)
+Result: "small", "normal, "large"
+
+
+$font-sizes: ("small": 12px, "normal": 18px, "large": 24px)
+$font-sizes2: ("x-large": 30px, "xx-large": 36px)
+map-merge($font-sizes, $font-sizes2)
+Result: "small": 12px, "normal": 18px, "large": 24px, "x-large": 30px, "xx-large": 36px
+
+
+$font-sizes: ("small": 12px, "normal": 18px, "large": 24px)
+map-remove($font-sizes, "small")
+Result: ("normal": 18px, "large": 24px)
+map-remove($font-sizes, "small", "large")
+Result: ("normal": 18px)
+
+
+$font-sizes: ("small": 12px, "normal": 18px, "large": 24px)
+map-values($font-sizes)
+Result: 12px, 18px, 24px
+
+
+
+####################################  Sass Selector Functions
+
+is-superselector("div", "div.myInput")
+Result: true
+is-superselector("div.myInput", "div")
+Result: false
+is-superselector("div", "div")
+Result: true
+
+selector-append("div", ".myInput")
+Result: div.myInput
+selector-append(".warning", "__a")
+Result: .warning__a
+
+
+selector-nest("ul", "li")
+Result: ul li
+selector-nest(".warning", "alert", "div")
+Result: .warning div, alert div
+
+
+selector-parse("h1 .myInput .warning")
+Result: ('h1' '.myInput' '.warning')
+
+
+selector-replace("p.warning", "p", "div")
+Result: div.warning
+
+
+selector-unify("myInput", ".disabled")
+Result: myInput.disabled
+selector-unify("p", "h1")
+Result: null
+
+
+
+simple-selectors("div.myInput")
+Result: div, .myInput
+simple-selectors("div.myInput:before")
+Result: div, .myInput, :before
+
+
+
+#######################################  Sass Color Functions
+
+rgb(red, green, blue)
+	0 and 255, or a percentage value (from 0% to 100%)
+	
+rgba(red, green, blue, alpha)
+
+hsl(hue, saturation, lightness)
+	Hue is a degree on the color wheel (from 0 to 360) - 0 or 360 is red, 120 is green, 240 is blue
+	Saturation is a percentage value; 0% means a shade of gray and 100% is the full color.
+	Lightness is also a percentage; 0% is black, 100% is white.
+	
+hsl(120, 100%, 50%); // green
+hsl(120, 100%, 75%); // light green
+hsl(120, 100%, 25%); // dark green
+hsl(120, 60%, 70%); // pastel green 
+
+
+hsla(hue, saturation, lightness, alpha)
+
+grayscale(color)
+	Sets a gray color with the same lightness as color.
+	
+grayscale(#7fffd4);
+Result: #c6c6c6
+
+
+complement(color)
+	Sets a color that is the complementary color of color.
+	
+invert(color, weight)
+	invert(white);
+	Result: black
+
+red(color)
+green(color)
+blue(color)
+hue(color)
+saturation(color)
+lightness(color)
+alpha(color)
+opacity(color)
+
+mix(color1, color2, weight)
+	Creates a color that is a mix of color1 and color2. The weight parameter must be between 0% and 100%.
+	A larger weight means that more of color1 should be used. A smaller weight means that more of color2 should be used.
+	Default is 50%.
+	
+adjust-hue(color, degrees)
+	Adjusts the color's hue with a degree from -360deg to 360deg.
+	
+adjust-color(color, red, green, blue, hue, saturation, lightness, alpha)
+	adjust-color(#7fffd4, blue: 25);
+	
+change-color(color, red, green, blue, hue, saturation, lightness, alpha)
+	change-color(#7fffd4, red: 255);
+	Result: #ffffd4
+	
+rgba(color, alpha)
+	Creates a new color of color with the given alpha channel.
+
+lighten(color, amount)
+darken(color, amount)
+saturate(color, amount)
+desaturate(color, amount)
+opacify(color, amount)
+fade-in(color, amount)
+transparentize(color, amount)
+fade-out(color, amount)
+
+######################################### frameworks
+
+- bourbon
+- neat : grid
+- bitter : style
+- compass
+
+#########################################
+
+
+	
+
+	
+
+
+
+
+
+
+

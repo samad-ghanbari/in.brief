@@ -1,0 +1,111 @@
+++++++++++++ PYTHON VERSION
+	python --version
+
+pythons bin files are located:
+	/usr/bin/python
+	/usr/bin/python3
+
+make python 3 as default:
+	mv /usr/bin/python /usr/bin/python2
+	ln -s /usr/bin/python3 /usr/bin/python
+
+++++++++++++++++++++++++++++++++ FLASK
+
+- sudo apt-get install python3-flask
+
+++++++++++++++++++++++++++++++++ APACHE2
+
+- install :
+	sudo apt-get install apache2
+
+- Installing mod_wsgi :
+	sudo apt-get install libapache2-mod-wsgi-py3 python-dev
+
+- Creating a .wsgi file :
+	To run your application you need a .wsgi file. This file contains the code mod_wsgi is executing on startup to get the 
+	application object. The object called application in that file is then used as application.
+	
+	danet.wsgi :
+		import sys
+		sys.path.insert(0,'/var/www/html/pytest/')
+		from danet_index.py import app as application
+	
+- /etc/apache2/sites-available:
+	create file like : flask.conf:
+
+	<VirtualHost *:80>
+		
+		WSGIScriptAlias /pt /var/www/html/pytest/pytest.wsgi   >>> it means: localhost/pt
+		#WSGIScriptAlias / /var/www/html/pytest/pytest.wsgi   >>> it means: localhost
+
+		<Directory /var/www/html/pytest/ >
+			Order allow,deny
+			Allow from all
+		</Directory>
+
+
+
+		WSGIScriptAlias /hw /var/www/html/hw/hw.wsgi   >>> it means: localhost/hw
+
+		<Directory /var/www/html/hw/ >
+			Order allow,deny
+			Allow from all
+		</Directory>
+
+
+
+		ErrorLog ${APACHE_LOG_DIR}/error.log
+		CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+	</VirtualHost>
+
+
+- sudo a2dissite 000-default.conf
+- sudo a2ensite flask.conf
+- sudo service apache2 restart
+
+- a2query -s  >> shows enabled site
+
+++++++++++++++++++++++++++++++++++++ PYTHON BESIDE PHP IN APACHE
+
+<VirtualHost *:80>
+	
+	WSGIScriptAlias /pt /var/www/html/pytest/pytest.wsgi   #python app1
+	<Directory /var/www/html/pytest/ >
+		Order allow,deny
+		Allow from all
+	</Directory>
+
+
+
+	WSGIScriptAlias /hw /var/www/html/hw/hw.wsgi          #python app2
+	<Directory /var/www/html/hw/ >
+		Order allow,deny
+		Allow from all
+	</Directory>
+
+
+
+	ServerAdmin webmaster@localhost                      # php apps
+	DocumentRoot /var/www/html
+	<Directory /var/www/html>
+		Options Indexes FollowSymLinks MultiViews
+		AllowOverride All
+		Require all granted
+	</Directory>
+
+
+
+
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+</VirtualHost>
+
+
+
+
+
+
+
+

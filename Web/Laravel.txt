@@ -1,0 +1,596 @@
++++++++++++++++++++++++++++++++++  INSTALLATION
+we use composer to install
+
+-1   composer global require laravel/installer
+
+	it is installer. by using it we can generate different project by command:
+		laravel new project1
+		laravel new project2
+
+-2   composer create-project --prefer-dist laravel/laravel project1
+
+ 	it will download laravel and create a project for us.
+
++++++++++++++++++++++++++++++++++ CONFIGURATIONS
+
+in the man directory there is a file named   .env
+in this file we can configure the project. like database, debug mod and ...
+	
+	- enable the debugging:
+			APP_DEBUG = true
+	-application key for encryption:
+			APP_KEY=....
+
+laravel has a CLI named artisan to manage project.
+by using artisan we can generate app key:
+		php artisan key:generate
+
++++++++++++++++++++++++++++++++++ MVC
+
+Models and Controllers: /app/
+Views :			/resources/views/
+
+++++++++++++++++++++++++++++++++ ROUTE
+
+Routing:  /routes/web.php
+
+create new route :
+	Route::get('about', function(){ return view('about'); } );   // return a controller
+
+-route with arbitrary param:
+	Route::get('home/{param1?}', function($param1="default") {return "..."; } );
+
+-regex:
+	Route::get('home/{param1}/{param2}', function($param1, $param2) {return "..."; } )->where( ['param1'=> '^2...', 'param2'=>'..2$' ] );
+
+
+- to set reget for special paramere we can set regex in /app/Providers/RouteServiceProvider.php for that param:
+
+	in function boot we add :
+				$router->pattern('param1', '^...$');
+
+
+-named route:
+		Route::get('about', ['as'=>'ab', 'uses'=>function(){ return view('about'); }] ); 	
+
+		Route::get('xy', function(){ return redirect()->route('ab'); } ); 
+
+		Route::get('xy', function(){ return redirect()->route('ab', ['param1'=>'...']); } ); 
+
+
+-middleware to routes:
+
+		Route::group(
+				['middleware'=>'auth'],
+				function()
+					{
+						Route::get('x1', function(){ return view('x1'); } );
+
+						Route::get('x2', function(){ return view('x2'); } );
+					}
+				
+			    );
+
+
+- current route:
+		$r = Route::current();
+		$r->getName();
+		$r->getActionName();
+
+
+- display view in route without using controller:
+		Route::get('x1', function(){ return view('x1'); } );
+
+		x1.blade.php is a html file inside /resources/views/ folder.
+		blade is a laravel template engine and all views must have names like :  xxx.blade.php
+
+		Route::get('x1', function(){ return view('x.x1'); } );   >> by . folders are separated.
+			view is /resources/views/x/x1.blade.php
+
+- route connect to controller:
+	Route::get('x1', 'UserController@index' );  >> index is a function in UserController 
+
+
+-route resource :
+		Route:resource('install', 'InstallController');
+		Route:resource('install', 'InstallController', ['parameters'=>'['param1'=>'value1']] );
+
+-show routes by artisan:
+		php artisan route:list
+=====> when using controller route  >> it is better to cache routes. speed up the program.
+- route chache:
+	php artisan route:cache
+
+-remove route cache:
+	php artisan route:clear
+
+++++++++++++++++++++++++++++++++++++++++++ DISABLE CACHE
+
+	1-inside conig/cache.php
+		inside 'store' array add:
+			    // disable caches
+				    'none' =>
+				     [
+				      'driver' => 'null',
+				    ],
+
+	2- in env:
+		CACHE_DRIVER=none
+
+++++++++++++++++++++++++++++++++++++++++++ CONTROLLERS
+-template of controller:
+
+	namespace App\Http\Conrollers;
+	use App\Http\Controllers\Controller;
+	class UserController extends Controller
+		{
+		}
+
+- controller middleware:
+	
+		namespace App\Http\Conrollers;
+		use App\Http\Controllers\Controller;
+		class UserController extends Controller
+		{
+			__construct
+				{
+				$this->middleware('auth');
+				$this->middleware('log', ['only'=>['barAction', 'fooAction']] )
+				$this->middleware('log', ['except'=>['barAction', 'fooAction']] )
+				}
+		}
+
+
+- create controller by artisan:
+	php artisan make:controller TestController   >> starts with capital and ends with Controller
+
+- RESTful resource controller by artsan:
+	php artisan make:controller TestController --resource
+		
++++++++++++++++++++++++++++++++++++++++++++ MIDDLEWARE
+
+	REQUEST <--> MIDDLEWARE <-->RESPONSE
+
+- request >>> middleware(auth) >> if authenticated >> controller method
+
+- directory of middleware: 
+		App\Http\Middleware
+
+ => several middleware included in laravel like : authentication , maintenance , CSRF protection ...
+
+- define middleware:
+	php artisan make:middleware AgeMiddleware   >> starts with capital and ends with Middleware
+
+
+-Middleware Template:
+
+		namespace App\Http\Middleware;
+		use Closure;  //>> Closure to go to next middleware
+		class AgeMiddleware
+		{
+			public function handle($request, Closure $next)
+				{
+					// my conditions	
+					return $next($request);
+				}
+		}
+
+
+- use our own middleware:
+	+ first we should register our middleware:
+		App\Http\Kernel.php
+			add it in RouteMiddlewares array:
+				'AgeMW'=>"App\Http\Middleware\AgeMiddleware::class"
+
+	+ in the routes:
+		Route::get('aaa', ['middleware'=>'AgeMW', 'uses'=>'AgeController@index'] ); 
+
+
+- After / Befor Middleware
+	default before
+
+		namespace App\Http\Middleware;
+		use Closure;  //>> Closure to go to next middleware
+		class AgeAfterMiddleware
+		{
+			public function handle($request, Closure $next)
+				{
+					$req = $next($request); >> next middleware first commit
+					// my conditions After middleware	
+					return $req;
+				}
+		}
+
+
+- group middleware:
+	if multiple middleware should commit to multi routes, we can group all middlewares in one group and use just group name.
+
+	App\Http\Kernel.php
+	add it in middlewareGroups array:
+		'AgeG'=>['mw1', 'mw2']
+
+
+- pass parameter to middleware:
+	-in routes:
+		Route::get('aaa', ['middleware'=>'AgeMW:PARAM1,PARAM2', 'uses'=>'AgeController@index'] );
+		
+	-in middleware
+		public function handle($request, Closure $next, $PARAM1, $PARAM2)
+			{}
+		
+
+
+- middleware terminate:
+	sometimes middleware needs to do something after the response sent to the browser.
+	
+	-in middleware after handle function we write this function:
+
+			public function terminate($request, $response)
+			{
+			}
+
+++++++++++++++++++++++++++++++++++++ REQUEST
+
+- in controller:
+	public function update(Request $req)
+{
+	$req->path();
+	$req->input('FIELD_FORM');
+	$input_array = $req->all(); // all inputs as array
+	$input_array = $req->only('name', 'lastname'); // name and lastname inputs as array
+	$input_array = $req->except('name', 'lastname'); // all inputs as array except name and lastname
+	$req->isMethod('POST');// false/ true
+}
+
+++++++++++++++++++++++++++++++++++++ FLASH MESSAGE
+
+-in controller:
+	use Session;
+
+	function index()
+	{
+	Session::flash('flash_name', "message....."); >> can send array
+	return redirect()->action('HomeController@home');
+	// or : return redirect()->route('homeR'); >> homeR is name of route
+	// or : return redirect()->url('..');
+	}
+
+	function home()
+	{
+	
+	}
+
+
+-in view:
+	@extends('layouts.app')
+
+	@section('content')
+		{{ Session::get('flash_name') }}
+	@endsection
+
+
+
+++++++++++++++++++++++++++++++++++  LOAD JS AT BOTTOM
+-in views:
+	@push('js')
+		//js files
+	@endpush
+
+-in resources/views/layouts/app.blade.php   >> main layout
+	at the bottom of js loads:
+		@stack('js')
+
++++++++++++++++++++++++++++++++++++ VIEWS
+
+	TEMPLATE ENGINE : BLADE
+views names must be like :   XXX.blade.php
+
+-render view from controller:
+	function index()
+{
+...
+
+return view('index');
+//or : return view('index')->with(['PARAM1'=>"value1"]);
+//or : return view('index')->withPARAM1('value1');
+//or : return view('index', ['PARAM1'=>'value1']);
+}
+
+
+-check view exists or not:
+	if( view()->exists('index') ){...}
+
+
+
++++++++++++++++++++++++++++++++++++ BLADE TEMPLATE ENGINE
+-blade command starts with @
+
+-allow us to write blade and pure php code.
+-converts and cache blade code to pure php to decrease overhead.
+-create section in layout by @yield
+
+	@yield('title')
+	@yield('content')
+
+-fill section content in view by :
+	1-
+		@section('content')
+		...
+		@endsection
+	2-	
+		@section('title', 'main')
+
+- we can create a layout and in the view inherit from it.
+
+		@extends('layouts.master')
+
+
+-blade echo command:
+	{{ $PARAM }}  ===  <?= $PARAM; ?> >>> @PARAM encoded (escaped) 
+	{!! $PARAM !!}			  >>> in this format renders html code
+
+
+-blade or command:
+	{{ isset($param1)? $param1 : "nothing" }}  === {{ $param1 or "nothing" }}
+
+-blade statement:
+	@if($a > 0)
+		aaaa     >>> no need to write echo- simpler than php statement
+	@elseif($a > 10)
+		<b>bbbb</b>
+	@else
+		cccc
+	@endif
+
+	@for()
+		...   >>> html codes
+	@endfor
+
+
+-include sub-view
+	@include('part2/p1', ['p1'=>'param1', 'p2'=>'param2'])
+
+
+-foreach item include :	
+	@each('part2/p1', '$arry', 'ARRAY');
+
+
+-comment in blade:
+	{{--  COMMENTS --}}	
+
+
+-stack:
+	we can sore anything in a variable by using push. and whenever we need by using stack use them.
+
+	@push('foo')
+		HTML CODES ...   >> these are not displayed
+	@endpush
+
+
+	@stack('foo')           >>> here they are displayed
+
+
+- blade engine caches all views  to pure php to speed up execution. in case there is a wrong display of view
+	we can clear cached views:
+		
+	php artisan view:clear
+
+
+++++++++++++++++++++++++++++++++++++++ LAYOUT
+
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title> @yield('title') </title>
+    <script src="{{ asset('resources/js/bootstrap.min.js') }}" ></script>
+    <script src="{{ asset('resources/js/jquery3.5.js') }}" ></script>
+    <link href="{{ asset('resources/css/bootstrap.min.css') }}" rel="stylesheet" />
+    <link href="{{ asset('resources/css/style.css') }}" rel="stylesheet" />
+  </head>
+  <body>
+    @yield('content')
+  </body>
+</html>
+
+
+++++++++++++++++++++++++++++++++++++++ AUTHENTICATION
+
+file:   config/auth.php
+
+
+command :
+	php artisan make:auth
+
++++++++++++++++++++++++++++++++++++++ VALIDATION
+
+-incontroller
+	function post(Request $rq)
+	{
+		$this->validate($rq, ['name'=>'required|alpha', ...]) ;// name is a form input
+	}
+
+-in view page we have a parameter name  $errors
+	by checking it we can generate corresponding error.
+
+
+-in view page we have a parameter named $old which contains old form parameters.
+
+---- REQUEST VALIDATION:
+	-by cli:
+		php partisan make:request postRequest    >> a postRequest is created in app/Request folder
+
+	- in function rules we can write our rules
+			return ['name'=>'required', ....]
+
+	-in controler:
+		use App\Http\Request\postRequest;
+		
+		function post(postRequest $rq){...}   >> here automaticcaly validate request
+
+
+
+
++++++++++++++++++++++++++++++++++++++++++ DATABASE
+
+-to configure :
+	.env file set parametes.
+
+-database setting:
+	config/database.php   >> this files read the parameters from env file
+		>> set DB_CONNECTION to mysql
+
+-command methods:
+	-raw sql
+	-fluent query builder
+	-Eloquent ORM
+
+
+-RAW QUERY:
+	in controllers:
+		use DB;
+
+		$res = DB::select("select * from tbl1 where id=?", [1]);
+		$res = DB::select("select * from tbl1 where id=:id AND name=:name", [':id'=>1, ':name'=>'sss']);
+		
+		$res = DB::insert("insert ....");   // true/false
+
+		$res = DB::update("update ....");   // true/false
+		
+		$res = DB::delete("delete ....");   // true/false
+
+		$res = DB::statement(" ANY SQL COMMAND");
+
+
+-QUERY BUILDER:
+		use DB;
+		
+		$res = DB::tabel('user')->get(); //select
+		$res = DB::table('user')->where('name', 'john')->first();
+		$res = DB::table('user')->where('name','!=', 'john')->get();
+		$res = DB::table('user')->where([ [cond1], [cond2] ])->get();
+		$res = DB::table('user')->where('name','like', 'john')->orWhere('id','3')->get();
+		$res = DB::table('user')->where('name','like', 'john')->andWhere('id', '3')->get();
+		$res = DB::table('user')->where('name','like', 'john')->get();
+		$res = DB::table('user')->select('name')->where('name', 'john')->get();
+		$res = DB::table('user')->where('name', 'john')->value('id'); // read field
+		$res = DB::tabel('user')->pluck('id', 'name'); // map key->value  id=>name
+		$res = DB::tabel('user')->where('name', 'john')->count("*");
+		
+		$res = DB::table('user')->insert(['field1'=>''val1, 'field2'=>'val2']);
+		$res = DB::table('user')->insertGetId(['field1'=>''val1, 'field2'=>'val2']);  //insert and return PK
+
+		$res = DB::table('user')->where('id', 1)->update(['vote'=>2]);
+		
+		$res = DB::table('user')->where('id', 1)->delete();
+
+
+
+-ELOQUENT ORM:
+	ORM : Object Relational Mapping
+	each table ==> one MODEL
+models are in directory:  app/
+
+-cli command:
+		php artisan make:model TABLE_NAME   >> first letter must be capital
+
+-model template :
+		namespace App;
+		use Illuminate\Database\Eloquent\Model;
+		class M1 extends Model{}
+
+
+-set table name:
+	class M1 extends Model
+		{
+			public $table = "table1";
+		}
+
+-set primary key:    >> default primary key is id
+		class M1 extends Model
+		{
+			public $primarykey = "devex_id";
+		}
+
+-by default each table has a timestamp:  like update_at ...
+	in case we don't have it :
+		class M1 extends Model
+		{
+			public $timestamp = false
+		}
+
+
+-read model records:
+	-in controllers:
+		use App\Model1;
+		
+		$res = Model1::all();
+		$res = Model1::find(1);  >> find record with pk = 1
+		$res = Model1::find([2, 4]);
+		$res = Model1::find(1)->field1;  >> read field1 of record
+		$res = Model1::where('id', 2)->get();
+		$res = Model1::where('id', 2)->orderBy('name', 'DESC')->get();
+		$res = Model1::where('id', '>', 4)->count();
+
+		$res = Model1::find(5);
+		$res->name = "new value";
+		$res->save();
+
+		$res = Model1::find(5);
+		$res->delete();
+
+		$res = Model1::destroy(5); // remove with pk = 5
+
+
+- in model :
+	* protected $fillable=['field1, ....']; >>> user can modify
+	* protected $guarded=['field2', ...];   >>> user cannot modify
+
+
++++++++++++++++++++++++++++++++++++++++ PAGINATION
+
+-in controller
+	$model = Model1->pagination(20);
+		
+
+
+
+-in view:
+	...
+	{!! $model->links() !!}
+
++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

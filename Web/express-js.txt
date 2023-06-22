@@ -1,0 +1,875 @@
+Fast, unopinionated, minimalist web framework for Node.js
+============================== install 
+npm install express --save
+============================== Installing
+$ mkdir myapp
+$ cd myapp
+$ npm init
+npm install express
+============================== Hello world example
+
+const express = require('express')
+const app = express()
+const port = 3000
+
+app.get('/', (req, res) => {
+  res.send('Hello World!')
+})
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`)
+})
+
+
+node app.js
+
+
+For every other path, it will respond : 
+localhost/user
+    Cannot GET /user
+    
+============================== Express application generator
+quickly create an application skeleton
+
+npm install -g express-generator
+$ express
+
+express -h
+
+    -h, --help          output usage information
+        --version       output the version number
+    -e, --ejs           add ejs engine support
+        --hbs           add handlebars engine support
+        --pug           add pug engine support
+    -H, --hogan         add hogan.js engine support
+        --no-view       generate without view engine
+    -v, --view <engine> add view <engine> support (ejs|hbs|hjs|jade|pug|twig|vash) (defaults to jade)
+    -c, --css <engine>  add stylesheet <engine> support (less|stylus|compass|sass) (defaults to plain css)
+        --git           add .gitignore
+    -f, --force         force on non-empty directory
+    
+    
+ express --view=pug myapp
+ 
+ $ cd myapp
+$ npm install
+
+
+.
+├── app.js
+├── bin
+│   └── www
+├── package.json
+├── public
+│   ├── images
+│   ├── javascripts
+│   └── stylesheets
+│       └── style.css
+├── routes
+│   ├── index.js
+│   └── users.js
+└── views
+    ├── error.pug
+    ├── index.pug
+    └── layout.pug
+
+7 directories, 9 files
+
+express -e html/
+
+
+============================== Basic routing
+Route definition takes the following structure:
+     app.METHOD(PATH, HANDLER)
+
+    app is an instance of express.
+    METHOD is an HTTP request method, in lowercase.
+    PATH is a path on the server.
+    HANDLER is the function executed when the route is matched.
+
+
+app.get('/', (req, res) => {
+  res.send('Hello World!')
+})
+
+app.post('/', (req, res) => {
+  res.send('Got a POST request')
+})
+
+app.put('/user', (req, res) => {
+  res.send('Got a PUT request at /user')
+})
+
+app.delete('/user', (req, res) => {
+  res.send('Got a DELETE request at /user')
+})
+
+
+============================== Serving static files in Express
+
+To serve static files such as images, CSS files, and JavaScript files, use the express.static built-in middleware function in Express.
+
+The function signature is:
+    express.static(root, [options])
+
+
+For example, use the following code to serve images, CSS files, and JavaScript files in a directory named public:
+
+app.use(express.static('public'))
+
+Now, you can load the files that are in the public directory:
+http://localhost:3000/images/kitten.jpg
+http://localhost:3000/css/style.css
+http://localhost:3000/js/app.js
+http://localhost:3000/images/bg.png
+http://localhost:3000/hello.html
+
+ Express looks up the files relative to the static directory, so the name of the static directory is not part of the URL. 
+
+Express looks up the files in the order in which you set the static directories with the express.static middleware function.
+ 
+app.use(express.static('public'))
+app.use(express.static('files'))
+
+
+To create a virtual path prefix (where the path does not actually exist in the file system) for files that are served by the express.static function, specify a mount path for the static directory, as shown below:
+
+app.use('/static', express.static('public'))
+
+Now, you can load the files that are in the public directory from the /static path prefix.
+
+http://localhost:3000/static/images/kitten.jpg
+http://localhost:3000/static/css/style.css
+http://localhost:3000/static/js/app.js
+http://localhost:3000/static/images/bg.png
+http://localhost:3000/static/hello.html
+
+
+
+However, the path that you provide to the express.static function is relative to the directory from where you launch your node process. If you run the express app from another directory, it’s safer to use the absolute path of the directory that you want to serve:
+
+const path = require('path')
+app.use('/static', express.static(path.join(__dirname, 'public')))
+
+
+============================== Routing
+You define routing using methods of the Express app object that correspond to HTTP methods; for example, app.get() to handle GET requests and app.post to handle POST requests. For a full list, see app.METHOD. You can also use app.all() to handle all HTTP methods and app.use() to specify middleware as the callback function 
+
+const express = require('express')
+const app = express()
+// GET method route
+app.get('/', (req, res) => {
+  res.send('GET request to the homepage')
+})
+
+// POST method route
+app.post('/', (req, res) => {
+  res.send('POST request to the homepage')
+})
+
+There is a special routing method, app.all(), used to load middleware functions at a path for all HTTP request methods.
+
+app.all('/secret', (req, res, next) => {
+  console.log('Accessing the secret section ...')
+  next() // pass control to the next handler
+})
+
+
+============================== Route paths
+Route paths, in combination with a request method, define the endpoints at which requests can be made. Route paths can be strings, string patterns, or regular expressions.
+
+
+
+app.get('/', (req, res) => {
+  res.send('root')
+})
+
+app.get('/about', (req, res) => {
+  res.send('about')
+})
+
+app.get('/random.text', (req, res) => {  ///random.text.
+  res.send('random.text')
+})
+
+app.get('/ab?cd', (req, res) => { // acd and abcd.
+  res.send('ab?cd')
+})
+
+
+app.get('/ab*cd', (req, res) => { // abcd, abxcd, abRANDOMcd, ab123cd, and so on.
+  res.send('ab*cd')
+})
+
+
+============================== Route parameters
+
+Route parameters are named URL segments that are used to capture the values specified at their position in the URL. 
+
+Route path: /users/:userId/books/:bookId
+Request URL: http://localhost:3000/users/34/books/8989
+req.params: { "userId": "34", "bookId": "8989" }
+
+app.get('/users/:userId/books/:bookId', (req, res) => {
+  res.send(req.params)
+})
+
+Since the hyphen (-) and the dot (.) are interpreted literally, they can be used along with route parameters for useful purposes.
+
+Route path: /flights/:from-:to
+Request URL: http://localhost:3000/flights/LAX-SFO
+req.params: { "from": "LAX", "to": "SFO" }
+
+Route path: /plantae/:genus.:species
+Request URL: http://localhost:3000/plantae/Prunus.persica
+req.params: { "genus": "Prunus", "species": "persica" }
+
+
+============================== Route handlers
+
+
+You can provide multiple callback functions that behave like middleware to handle a request. The only exception is that these callbacks might invoke next('route') to bypass the remaining route callbacks.
+
+app.get('/example/a', (req, res) => {
+  res.send('Hello from A!')
+})
+
+
+app.get('/example/b', (req, res, next) => {
+  console.log('the response will be sent by the next function ...')
+  next()
+}, (req, res) => {
+  res.send('Hello from B!')
+})
+
+---
+const cb0 = function (req, res, next) {
+  console.log('CB0')
+  next()
+}
+
+const cb1 = function (req, res, next) {
+  console.log('CB1')
+  next()
+}
+
+const cb2 = function (req, res) {
+  res.send('Hello from C!')
+}
+
+app.get('/example/c', [cb0, cb1, cb2])
+
+---
+
+const cb0 = function (req, res, next) {
+  console.log('CB0')
+  next()
+}
+
+const cb1 = function (req, res, next) {
+  console.log('CB1')
+  next()
+}
+
+app.get('/example/d', [cb0, cb1], (req, res, next) => {
+  console.log('the response will be sent by the next function ...')
+  next()
+}, (req, res) => {
+  res.send('Hello from D!')
+})
+
+---
+
+
+============================== Response methods
+
+The methods on the response object (res) in the following table can send a response to the client, and terminate the request-response cycle. If none of these methods are called from a route handler, the client request will be left hanging.
+
+res.download() 	       Prompt a file to be downloaded.
+res.end() 	       End the response process.
+res.json() 	       Send a JSON response.
+res.jsonp() 	       Send a JSON response with JSONP support.
+res.redirect()         Redirect a request.
+res.render() 	       Render a view template.
+res.send()             Send a response of various types.
+res.sendFile()         Send a file as an octet stream.
+res.sendStatus()       Set the response status code and send its string representation as the response body.
+
+
+============================== app.route()
+
+You can create chainable route handlers for a route path by using app.route().
+
+app.route('/book')
+  .get((req, res) => {
+    res.send('Get a random book')
+  })
+  .post((req, res) => {
+    res.send('Add a book')
+  })
+  .put((req, res) => {
+    res.send('Update the book')
+  })
+  
+  
+============================== express.Router
+Use the express.Router class to create modular, mountable route handlers. A Router instance is a complete middleware and routing system; for this reason, it is often referred to as a “mini-app”.
+
+
+Create a router file named birds.js in the app directory, with the following content:
+
+const express = require('express')
+const router = express.Router()
+
+// middleware that is specific to this router
+router.use((req, res, next) => {
+  console.log('Time: ', Date.now())
+  next()
+})
+// define the home page route
+router.get('/', (req, res) => {
+  res.send('Birds home page')
+})
+// define the about route
+router.get('/about', (req, res) => {
+  res.send('About birds')
+})
+
+module.exports = router
+
+
+---
+
+
+const birds = require('./birds')
+
+// ...
+
+app.use('/birds', birds)
+
+============================== Writing middleware
+
+Middleware functions are functions that have access to the request object (req), the response object (res), and the next function in the application’s request-response cycle. The next function is a function in the Express router which, when invoked, executes the middleware succeeding the current middleware.
+
+Middleware functions can perform the following tasks:
+
+    Execute any code.
+    Make changes to the request and the response objects.
+    End the request-response cycle.
+    Call the next middleware in the stack.
+
+If the current middleware function does not end the request-response cycle, it must call next() to pass control to the next middleware function. Otherwise, the request will be left hanging.
+
+---
+
+const express = require('express')
+const app = express()
+
+const myLogger = function (req, res, next) {
+  console.log('LOGGED')
+  next()
+}
+
+app.use(myLogger) // middleware
+
+app.get('/', (req, res) => {
+  res.send('Hello World!') // end the req-res cycle
+})
+
+app.listen(3000)
+
+
+
+
+============================== Using middleware
+An Express application can use the following types of middleware:
+
+    Application-level middleware
+    Router-level middleware
+    Error-handling middleware
+    Built-in middleware
+    Third-party middleware
+
+============================== Application-level middleware
+
+Bind application-level middleware to an instance of the app object by using the app.use() and app.METHOD() functions
+
+---
+
+const express = require('express')
+const app = express()
+
+app.use((req, res, next) => {
+  console.log('Time:', Date.now())
+  next()
+})
+
+
+---
+
+app.get('/user/:id', (req, res, next) => {
+  console.log('ID:', req.params.id)
+  next()
+}, (req, res, next) => {
+  res.send('User Info')
+})
+
+// handler for the /user/:id path, which prints the user ID
+app.get('/user/:id', (req, res, next) => {
+  res.send(req.params.id)
+})
+
+---
+
+
+
+
+============================== Router-level middleware
+
+Router-level middleware works in the same way as application-level middleware, except it is bound to an instance of express.Router().
+
+---
+const express = require('express')
+const app = express()
+const router = express.Router()
+
+// a middleware function with no mount path. This code is executed for every request to the router
+router.use((req, res, next) => {
+  console.log('Time:', Date.now())
+  next()
+})
+
+// a middleware sub-stack shows request info for any type of HTTP request to the /user/:id path
+router.use('/user/:id', (req, res, next) => {
+  console.log('Request URL:', req.originalUrl)
+  next()
+}, (req, res, next) => {
+  console.log('Request Type:', req.method)
+  next()
+})
+
+
+============================== Error-handling middleware
+
+Error-handling middleware always takes four arguments.
+ Even if you don’t need to use the next object, you must specify it to maintain the signature. Otherwise, the next object will be interpreted as regular middleware and will fail to handle errors.
+ 
+ app.use((err, req, res, next) => {
+  console.error(err.stack)
+  res.status(500).send('Something broke!')
+})
+
+
+
+
+============================== Built-in middleware
+
+    express.static serves static assets such as HTML files, images, and so on.
+    express.json parses incoming requests with JSON payloads. NOTE: Available with Express 4.16.0+
+    express.urlencoded parses incoming requests with URL-encoded payloads. NOTE: Available with Express 4.16.0+
+
+
+
+============================== Third-party middleware
+
+Use third-party middleware to add functionality to Express apps.
+
+The following example illustrates installing and loading the cookie-parsing middleware function cookie-parser.
+
+$ npm install cookie-parser
+
+const express = require('express')
+const app = express()
+const cookieParser = require('cookie-parser')
+
+// load the cookie-parsing middleware
+app.use(cookieParser())
+
+
+
+============================== Overriding the Express API
+
+There are two extension points for the Express API:
+
+
+    The global prototypes at express.request and express.response.
+    App-specific prototypes at app.request and app.response.
+
+
+Altering the global prototypes will affect all loaded Express apps in the same process.
+
+Methods
+
+You can override the signature and behavior of existing methods with your own, by assigning a custom function.
+
+Following is an example of overriding the behavior of res.sendStatus.
+
+app.response.sendStatus = function (statusCode, type, message) {
+  // code is intentionally kept simple for demonstration purpose
+  return this.contentType(type)
+    .status(statusCode)
+    .send(message)
+}
+
+
+res.sendStatus(404, 'application/json', '{"error":"resource not found"}')
+
+---
+Properties
+---
+Prototype
+
+
+============================== template engines
+
+set:
+ 1- views:
+ 	app.set('views', './views');
+ 		default is views
+ 
+ 2- view engine:
+ 	app.set('view engine', 'pug');
+ 	
+npm install pug --save
+ or
+npm install ejs --save
+
+
+.
+.
+.
+app.get('/', (req, res) => {
+  res.render('index', { title: 'Hey', message: 'Hello there!' })
+})
+
+
+---
+npm install ejs
+
+let ejs = require('ejs');
+let people = ['geddy', 'neil', 'alex'];
+let html = ejs.render('<%= people.join(", "); %>', {people: people});
+
+
+Usage
+let template = ejs.compile(str, options);
+template(data);
+// => Rendered HTML string
+
+ejs.render(str, data, options);
+// => Rendered HTML string
+
+ejs.renderFile(filename, data, options, function(err, str){
+    // str => Rendered HTML string
+});
+
+
+
+---
+
+Options
+
+    cache Compiled functions are cached, requires filename
+    filename Used by cache to key caches, and for includes
+    root Set project root for includes with an absolute path (e.g, /file.ejs). Can be array to try to resolve include from multiple directories.
+    views An array of paths to use when resolving includes with relative paths.
+    context Function execution context
+    compileDebug When false no debug instrumentation is compiled
+    client Returns standalone compiled function
+    delimiter Character to use for inner delimiter, by default '%'
+    openDelimiter Character to use for opening delimiter, by default '<'
+    closeDelimiter Character to use for closing delimiter, by default '>'
+    debug Outputs generated function body
+    strict When set to `true`, generated function is in strict mode
+    _with Whether or not to use with() {} constructs. If false then the locals will be stored in the locals object. (Implies `--strict`)
+    localsName Name to use for the object storing local variables when not using with Defaults to locals
+    rmWhitespace Remove all safe-to-remove whitespace, including leading and trailing whitespace. It also enables a safer version of -%> line slurping for all scriptlet tags (it does not strip new lines of tags in the middle of a line).
+    escape The escaping function used with <%= construct. It is used in rendering and is .toString()ed in the generation of client functions. (By default escapes XML).
+    outputFunctionName Set to a string (e.g., 'echo' or 'print') for a function to print output inside scriptlet tags.
+    async When true, EJS will use an async function for rendering. (Depends on async/await support in the JS runtime.
+
+
+
+
+
+---
+
+
+Tags
+
+    <% 'Scriptlet' tag, for control-flow, no output
+    <%_ ‘Whitespace Slurping’ Scriptlet tag, strips all whitespace before it
+    <%= Outputs the value into the template (HTML escaped)
+    <%- Outputs the unescaped value into the template
+    <%# Comment tag, no execution, no output
+    <%% Outputs a literal '<%'
+    %> Plain ending tag
+    -%> Trim-mode ('newline slurp') tag, trims following newline
+    _%> ‘Whitespace Slurping’ ending tag, removes all whitespace after it
+
+
+<%= tag escapes the html tags, and does not let them to be translated.
+The opposite happens with <%- tag, where html is translated (unescaped)
+
+<%= x %>
+<%- x %>
+
+<p>This is a paragraph</p> 
+This is a paragraph
+
+---
+
+Includes
+
+Includes are relative to the template with the include call. (This requires the 'filename' option.) For example if you have "./views/users.ejs" and "./views/user/show.ejs" you would use <%- include('user/show'); %>.
+
+You'll likely want to use the raw output tag (<%-) with your include to avoid double-escaping the HTML output.
+
+<ul>
+  <% users.forEach(function(user){ %>
+    <%- include('user/show', {user: user}); %>
+  <% }); %>
+</ul>
+
+
+---
+Custom delimiters
+
+Custom delimiters can be applied on a per-template basis, or globally:
+
+let ejs = require('ejs'),
+    users = ['geddy', 'neil', 'alex'];
+
+// Just one template
+ejs.render('<?= users.join(" | "); ?>', {users: users},
+    {delimiter: '?'});
+// => 'geddy | neil | alex'
+
+// Or globally
+ejs.delimiter = '$';
+ejs.render('<$= users.join(" | "); $>', {users: users});
+// => 'geddy | neil | alex'
+
+
+---
+Caching
+
+EJS ships with a basic in-process cache for caching the intermediate JavaScript functions used to render templates. It's easy to plug in LRU caching using Node's `lru-cache` library:
+
+let ejs = require('ejs'),
+    LRU = require('lru-cache');
+ejs.cache = LRU(100); // LRU cache with 100-item limit
+
+If you want to clear the EJS cache, call ejs.clearCache. If you're using the LRU cache and need a different limit, simple reset `ejs.cache` to a new instance of the LRU.
+
+
+
+---
+
+Custom file loader
+
+The default file loader is fs.readFileSync, if you want to customize it, you can set ejs.fileLoader.
+
+let ejs = require('ejs');
+let myFileLoader = function (filePath) {
+  return 'myFileLoader: ' + fs.readFileSync(filePath);
+};
+
+ejs.fileLoader = myFileLoader;
+
+With this feature, you can preprocess the template before reading it.
+
+
+---
+
+Layouts
+
+EJS does not specifically support blocks, but layouts can be implemented by including headers and footers, like so:
+
+<%- include('header'); -%>
+<h1>
+  Title
+</h1>
+<p>
+  My page
+</p>
+<%- include('footer'); -%>
+
+
+
+---
+
+
+
+============================== Error Handling
+
+It’s important to ensure that Express catches all errors that occur while running route handlers and middleware.
+
+Errors that occur in synchronous code inside route handlers and middleware require no extra work. If synchronous code throws an error, then Express will catch and process it. For example:
+
+app.get('/', (req, res) => {
+  throw new Error('BROKEN') // Express will catch this on its own.
+})
+
+
+For errors returned from asynchronous functions invoked by route handlers and middleware, you must pass them to the next() function, where Express will catch and process them. For example:
+
+app.get('/', (req, res, next) => {
+  fs.readFile('/file-does-not-exist', (err, data) => {
+    if (err) {
+      next(err) // Pass errors to Express.
+    } else {
+      res.send(data)
+    }
+  })
+})
+
+
+============================== Debugging Express
+
+To see all the internal logs used in Express, set the DEBUG environment variable to express:* when launching your app.
+
+ $ DEBUG=express:* node index.js
+ 
+ win: set DEBUG=express:* & node index.js
+ 
+ 
+============================== MySQL
+
+$ npm install mysql
+
+const mysql = require('mysql')
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'dbuser',
+  password: '...',
+  database: 'my_db'
+})
+
+connection.connect()
+
+connection.query('SELECT 1 + 1 AS solution', (err, rows, fields) => {
+  if (err) throw err
+
+  console.log('The solution is: ', rows[0].solution)
+})
+
+connection.end()
+
+============================== PostgreSQL
+
+$ npm install pg-promise
+
+const pgp = require('pg-promise')(/* options */)
+const db = pgp('postgres://username:password@host:port/database')
+
+db.one('SELECT $1 AS value', 123)
+  .then((data) => {
+    console.log('DATA:', data.value)
+  })
+  .catch((error) => {
+    console.log('ERROR:', error)
+  })
+
+============================== SQLite
+
+$ npm install sqlite3
+
+const sqlite3 = require('sqlite3').verbose()
+const db = new sqlite3.Database(':memory:')
+
+db.serialize(() => {
+  db.run('CREATE TABLE lorem (info TEXT)')
+  const stmt = db.prepare('INSERT INTO lorem VALUES (?)')
+
+  for (let i = 0; i < 10; i++) {
+    stmt.run(`Ipsum ${i}`)
+  }
+
+  stmt.finalize()
+
+  db.each('SELECT rowid AS id, info FROM lorem', (err, row) => {
+    console.log(`${row.id}: ${row.info}`)
+  })
+})
+
+db.close()
+
+
+============================== project
+cd /var/www/html
+npm init
+npm inistall --save express
+cd ..
+express -e html
+cd html
+npm install
+npm audit fix --force
+node app.js
+
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+==============================
+

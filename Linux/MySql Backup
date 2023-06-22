@@ -1,0 +1,6 @@
+- backup
+
+ mysqldump -u danet -p  --databases --routines --triggers --events danet > danet.sql
+
+- restore
+ mysql -u danet -p danet < danet97.sql

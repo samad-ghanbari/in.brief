@@ -1,0 +1,48 @@
+
+SED command in UNIX stands for stream editor and it can perform lots of functions on file like searching, find and replace, insertion or deletion. 
+
+You can use any character as a delimiter that's not part of either string.
+sed 's#directive set#Directive Set#' ./000-default.conf 
+
+to save changes in the same file: use -i switch which means in-file editing
+	sed -i ''
+	sed -i '//'
+
+1.Replacing or substituting string:
+	replace the word “unix” with “linux”
+		sed 's/unix/linux/' geekfile.txt
+		
+	Here the “s” specifies the substitution operation. The “/” are delimiters. The “unix” is the search pattern and the “linux” is the replacement string.
+	By default, the sed command replaces the first occurrence of the pattern in each line and it won’t replace the second, third…occurrence in the line.
+	
+	
+2.Replacing the nth occurrence of a pattern in a line : 
+	replace the second occurrence of the word “unix” with “linux”
+		sed 's/unix/linux/2' geekfile.txt
+
+
+3.Replacing all the occurrence of the pattern in a line : 
+	sed 's/unix/linux/g' geekfile.txt
+	
+	
+4.Replacing from nth occurrence to all occurrences in a line :
+	from third occurrence so on
+		sed 's/unix/linux/3g' geekfile.txt	
+		
+5. Replacing string on a specific line number : 
+	on line 3 replace unix with linux
+		sed '3 s/unix/linux/' geekfile.txt
+		
+6.Deleting lines from a particular file:
+	sed '5d' filename.txt # delete line 5 
+	sed '$d' filename.txt # delete last line 
+	sed 'x,yd' filename.txt # Delete line from range x to y
+	sed 'nth,$d' filename.txt # Delete from nth to last line
+
+7. append after (a)
+	sed '/^a.*/a ssss' test.txt
+		append line after match a.* (aaaaaaaa)
+
+8. insert before (i)
+	sed '/^a.*/i ssss' test.txt
+		insert line before match a.* (aaaaaaaa)

@@ -1,0 +1,14 @@
+1-First go to the official website of Java SE at http://www.oracle.com/technetwork/java/javase/overview/index.html
+
+2-download JAVA SE Developement Kit 10 : ...bin.tar.gz
+
+3-extract and move to /usr/local/jdk10
+
+4-sudo nano /etc/profile.d/jdk10.sh
+ write:
+
+	export JAVA_HOME="/usr/local/jdk-10"
+	export PATH="$PATH:${JAVA_HOME}/bin"
+CTRL+X
+
+5-reboot
