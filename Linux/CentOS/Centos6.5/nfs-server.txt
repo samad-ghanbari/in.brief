@@ -1,0 +1,48 @@
+1. Install NFS in Server system
+# yum install nfs* -y
+
+
+2. Start NFS service
+# service rpcbind start
+# chkconfig rpcbind on
+# service nfs start
+# chkconfig nfs on
+
+
+3. Install NFS in Client System
+# yum install nfs* -y
+
+4. Start NFS service
+# service rpcbind start
+# chkconfig rpcbind on
+# service nfs start
+# chkconfig nfs on
+
+5. Create shared directories in server
+# mkdir /home/nfs_share 
+# chmod 755 /home/nfs_share
+
+6. Export shared directory on NFS Server
+# vi /etc/exports
+/home/nfs_share     192.168.1.0/24(rw,sync,no_root_squash,no_all_squash)
+
+7. Restart the NFS service.
+# service nfs restart
+
+8. Mount the share directory in client
+# mkdir /mnt/nfs_mount
+# mount -t nfs 192.168.1.250:/home/nfs_share /mnt/nfs_mount/ 
+
+9. iptables
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 2049 -j ACCEPT  
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 111 -j ACCEPT 
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 32803 -j ACCEPT 
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 892 -j ACCEPT  
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 875 -j ACCEPT 
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 662 -j ACCEPT 
+# service iptables restart
+# mount -t nfs 192.168.1.250:/home/nfs_share /mnt/nfs_mount/
+
+
+10. Verify NFS
+# mount

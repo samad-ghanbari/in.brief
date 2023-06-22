@@ -1,0 +1,31 @@
+					(SAMBA)
+(Old system)
+
+Port 137 – UDP NetBIOS name service (WINS)
+Port 138 – UDP NetBIOS datagram
+Port 139 – TCP NetBIOS Session (TCP), Windows File and Printer Sharing (this is the most insecure port)
+
+(Active Directory)
+
+Port 445 - Microsoft-DS Active Directory, Windows shares (TCP)
+Port 445 - Microsoft-DS SMB file sharing (UDP)
+
+
+
+
+					(SELINUX)
+
+getsebool -a | grep samba
+getsebool -a | grep smb
+
+1- If you want samba to be a domain controller:
+setsebool -P samba_domain_controller on
+
+2- If you want to share the default home directory, type this command:
+setsebool -P samba_enable_home_dirs on
+
+3- Setting Up The Data Partition
+mkdir /mnt/data
+mount /dev/hd3 /mnt/data
+semanage fcontext -a -t samba_share_t '/mnt/data(/.*)?'
+restorecon -R /mnt/data

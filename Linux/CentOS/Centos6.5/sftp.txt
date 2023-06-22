@@ -1,0 +1,34 @@
+rpm -qa|grep ssh
+
+**********SFTP Configuration
+mkdir -p /data/sftp
+chmod 701 /data
+groupadd sftpusers
+useradd -g sftpusers -d /upload -s /sbin/nologin mysftpuser
+passwd mysftpuser
+
+
+mkdir -p /data/mysftpuser/upload
+chown -R root:sftpusers /data/mysftpuser
+chown -R mysftpuser:sftpusers /data/mysftpuser/upload
+ls -ld /data/
+ls -ld /data/mysftpuser
+ls -ld /data/mysftpuser/upload
+cat /etc/passwd|grep mysftpuser
+
+
+nano /etc/ssh/sshd_config
+Match Group sftpusers
+ChrootDirectory /data/%u
+ForceCommand internal-sftp
+service sshd status
+service sshd restart
+
+******Testing SFTP
+yum list nmap
+yum install nmap -y
+nmap -n 192.168.1.100
+sftp mysftpuser@192.168.1.100
+
+cd /data/mysftpuser/upload
+touch testing_file.txt

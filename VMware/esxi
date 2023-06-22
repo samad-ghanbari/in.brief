@@ -1,0 +1,45 @@
+-services can be installed by vib files
+
+-it needs to run in root 
+
+- enable ssh : 
+	vsphere configuration ssh start 
+
+-install web service as : embeded web client
+	1- download esxui.x.vib
+	2- by using vsphere datastore browse : upload the file 
+	3- # esxcli software vib  install -v /vmfs/volumes/datastore1/vib/esxui-signed-12086396.vib 
+	4- in url append /ui
+
+	if error 503 appeared run below command
+		/etc/init.d/rhttpproxy restart
+
+--- server
+10.82.14.181
+root
+data.123
+---
+_____________________________________
+reset root password
+ 	live boot
+ 	go to hdd 262M size 
+ 	find state.tgz
+ 	local.tgz
+ 	etc
+ 	find shadow
+ 		root:xxxx:..... >>> root::...
+
+ 		empty means not set
+
+
+____________________________________
+
+ESXI update 
+
+move the patch to the server 
+
+ esxcli software vib update   -d /vmfs/volumes/[DATA-STORE]/[PATCH_FILE].zip
+ 	in case error eccured
+ esxcli software vib install  -d /vmfs/volumes/[DATA-STORE]/[PATCH_FILE].zip
+
+

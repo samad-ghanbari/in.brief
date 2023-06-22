@@ -1,0 +1,72 @@
+1- yum install bind* -y
+2- vi /etc/sysconfig/network-scripts/ifcfg-eth1
+3- CHANGE NAT TO BRIDGE ( €ÌÌ— ò«—  ‘»òÂ ‰  »Â »—ÌÃ )
+4- change below setting :
+		DHCPPROTO = STATIC
+		DOMAIN = "lpic2class.com"
+		IPADDR = 192.168.105.X
+		DNS1 = 127.0.0.1
+		DNS2 = 8.8.8.8
+		GATEWAY = 192.168.105.1
+	SAVE AND EXIT (ESC + : + X + ENTER)
+5- vi /etc/hosts
+	goto last line and press o letter
+	and type : 192.168.105.x   srv1.lpic2class.com srv1
+	save and exit
+6- vi /etc/sysconfig/network
+	change HOSTNAME TO srv1.lpic2class.com
+
+7- reboot
+8- verify hostname (root@ ~ #hostname )
+9- verify /etc/resolv.conf
+10- vi /etc/named.conf
+11-insert below line before zone "." :
+	zone "lpic2class.com" {
+		type master;
+		file "lpic2class.com.zone";
+	};
+	save and exit
+
+12- vi /var/named/lpic2class.com.zone
+$ORIGIN	lpic2class.com.
+$TTL 1D
+@  IN	SOA	srv1.lpic2class.com. mail.lpic2class.com. (
+				2017111201; //serial 
+				21600;
+				3600;
+				1D;
+				1D;
+)
+	IN	NS	srv1.lpic2class.com.
+	IN 	MX	10 mail.lpic2class.com.
+srv1	IN	A	192.168.105.122
+www	IN	CNAME	srv1.lpic2class.com.
+mail	IN	CNAME	srv1.lpic2class.com.
+
+
+13- save and exit
+14- service named start
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		

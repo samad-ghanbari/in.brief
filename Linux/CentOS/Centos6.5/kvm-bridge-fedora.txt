@@ -1,0 +1,31 @@
+nmcli con show --active
+nmcli con add ifname br0 type bridge con-name br0
+nmcli con add type bridge-slave ifname enp0s25 master br0
+
+nmcli con modify br0 bridge.stp no
+nmcli con show br0
+nmcli con show
+
+nmcli con down wired-direct
+nmcli con up br0
+systemctl restart NetworkManager.service
+
+***Adding bridge networks to libvirt
+virsh net-list --all
+
+***Create network interface
+cat > bridge.xml <<EOF
+<network>
+    <name>host-bridge</name>
+    <forward mode="bridge"/>
+    <bridge name="br0"/>
+</network>
+EOF
+
+virsh net-define bridge.xml
+virsh net-list --all
+
+***Starting the network interface
+virsh net-start host-bridge
+virsh net-autostart host-bridge
+

@@ -1,0 +1,61 @@
+######################## Qt Application Installer For Windows
+
+1-compile source code in release mode
+
+2-copy the .exe that is generated from compile file to new location
+
+3-in the directory: shift+right click and open CMD 
+
+4-run windeployqt.exe c:\desktop\xx.exe (this command will gather all necessary dll (except our libmysql.dll))
+
+5-in case of using mysql, copy libmysql.dll file in the root of that directory. (C:\Qt\Qt5.10.1\5.10.1\mingw53_32\bin\libmysql.dll)
+
+6-open inno setup compiler
+
+7-select create new script with wizard
+
+8-go on and give .exe file and include the folder
+
+9-target computer must have microsoft visual C++ redistributable package.
+
+
+##################### Qt Application Installer For Linux 
+
+1-Please download linuxdeployqt-x86_64.AppImage from the Releases page and chmod a+x it.
+	https://github.com/probonopd/linuxdeployqt/releases
+	
+2-Usage: linuxdeployqt <app-binary|desktop file> -appimage -bundle-non-qt-libs -qmake=<path<default in case ommited>> 
+	(linuxdeployqt takes an application as input and makes it self-contained by copying in the Qt libraries and plugins that the application uses.)
+	
+3-appDir - the basic structure
+   Replace <theme> and <resolution> with (for example) hicolor and 256x256 respectively;
+
+└── usr
+    ├── bin
+    │   └── your_app
+    ├── lib
+    └── share
+        ├── applications
+        │   └── your_app.desktop
+        └── icons
+            └── <theme>
+                └── <resolution> 
+                    └── apps 
+                        └── your_app.png
+                        
+               
+4- Using the desktop file linuxdeployqt can determine the parameters of the build.
+
+[Desktop Entry]
+Type=Application
+Name=Amazing Qt App
+Comment=The best Qt Application Ever
+Exec=your_app
+Icon=your_app
+Categories=Office;
+         
+5- use:
+	linuxdeployqt-continuous-x86_64.AppImage path/to/AppDir/usr/share/applications/your_app.desktop
+                        
+	
+

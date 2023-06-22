@@ -1,0 +1,19 @@
+234  mkdir /nfs_share
+  235  chmod -R 777 /nfs_share/
+  236  vi /etc/exports 
+  237  service rpcbind start
+  238  service nfs start
+  239  vi /etc/sysconfig/nfs 
+  240  rpcinfo -p
+  241  iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 111 -j ACCEPT
+  242  iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 875 -j ACCEPT
+  243  iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 2049 -j ACCEPT
+  244  iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 44344 -j ACCEPT
+  245  iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 37102 -j ACCEPT
+  246  iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 48319 -j ACCEPT
+  247  iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 35998 -j ACCEPT
+  248  iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 46477 -j ACCEPT
+  249  service iptables save
+  250  service iptables restart
+  251  showmount -e localhost
+  252* mount -t nfs 192.168.105.122:/nfs_share /mnt/nfs

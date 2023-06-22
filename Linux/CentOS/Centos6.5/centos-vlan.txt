@@ -1,0 +1,47 @@
+*** manual method
+-lsmod | grep 8021q
+-modprobe 8021q
+
+-vi ifcfg-eth0.10
+DEVICE=eth0.10
+BOOTPROTO=none
+ONBOOT=yes
+IPADDR=14.1.1.31
+NETMASK=255.255.255.0
+USERCTL=no
+NETWORK=14.1.1.0
+VLAN=yes
+
+service network restart
+
+
+***************************vconfig  method
+-vconfig add eth0 5
+-ifconfig eth0.5
+-ifconfig eth0.5 192.168.1.100 netmask 255.255.255.0 broadcast 192.168.1.255 up
+
+----for delete vlan interface
+-ifconfig eth0.5 down
+-vconfig rem eth0.5
+
+
+*****************Create the VLAN device using the ip command
+
+-ip link add link eth0 name eth0.5 type vlan id 5
+-ip link
+-ip -d link show eth0.5
+-ip addr add 192.168.1.200/24 brd 192.168.1.255 dev eth0.5
+-ip link set dev eth0.5 up
+(for remove vlan)
+-ip link set dev eth0.5 down
+-ip link delete eth0.5
+
+
+
+
+****vlan config on Debian or Ubuntu based system
+auto eth0.5
+iface eth0.5 inet static
+    address 192.168.1.200
+    netmask 255.255.255.0
+    vlan-raw-device eth0

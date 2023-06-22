@@ -1,0 +1,101 @@
+######### boot CentOS 7 into Command Line or GUI Mode
+- know the default bool
+systemctl get-default
+
+    multi-user.target (the command line)
+    graphical.target (GUI)
+
+systemctl set-default multi-user.target
+systemctl set-default graphical.target
+
+################ RESET root password
+-reset system
+-press escape
+-on centos press 'e'
+-fine line starts with 'linux16 ...'
+-find 'ro' change it to 'rw init=/sysroot/bin/sh'
+-press CTRL+X to reboot
+-chroot /sysroot
+-passwd ....
+-reboot -f
+############### REPOSITORY
+yum install epel-release
+###############
+	NETWORK
+ip link show
+ip addr add IP/PREFIX via _ dev _
+ scripts:
+vi /etc/sysconfig/network-scripts/ifcfg-eth0
+	DEVICE=eth0
+	HWADDR=MAC_ADDRESS
+	#TYPE=Ethernet
+	ONBOOT=no
+	BOOTPROTO=none | dhcp
+	IPADDR=IP
+	#PREFIX=24
+	NETMASK=255.255.255.0
+	GATEWAY=IP
+	DNS1=IP
+	DNS2=IP
+	NM_CONTROLLED=yes
+
+ifdown eth0
+ifup eth0
+
+cat /etc/resolv.conf
+	nameserver 8.8.8.8
+	
+###############
+yum install htop
+yum remove PACKAGE
+yum whatprovides */semanage
+################## SAMBA SERVICE
+yum install samba samba-client samba-common
+
+create folder: mkdir /home/sambaShare
+create user:    useradd  sambauser
+                passwd sambauser
+create group :  groupadd sambagrp
+usermod -aG sambagrp sambauser
+chown sambauser:sambagrp /home/sambaShare
+chmod -R 3770 /home/sambaShare
+sambapasswd -a sambauser
+
+mv /etc/samba/smb.config /etc/samba/smb.conf.backup
+touch /etc/smb/smb.conf
+vi /etc/samba/smb.conf
+[global]
+workgroup = WORKGROUP
+security = user
+[MyShare]
+path = "/home/samad/sambaShare"
+browseable = yes
+writeable = yes
+guest ok = no
+ :x
+
+--iptables for samba
+service iptables start 
+iptables -I INPUT -m state --state NEW -p udp --dport 137 -j ACCEPT
+iptables -I INPUT -m state --state NEW -p udp --dport 138 -j ACCEPT
+iptables -I INPUT -m state --state NEW -p tcp --dport 139 -j ACCEPT
+service iptables save
+service iptables stop
+service iptables start
+
+
+--SELINUX for SAMBA
+yum install policycoreutils-python
+semanage -a  -t samba_share_t '/home/samad/sambaShare(/.*)?'
+restorecon -R /home/samad/sambaShare
+
+
+service smb start
+service nmb start 
+
+
+
+
+
+
+

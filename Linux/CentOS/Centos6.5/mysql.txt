@@ -1,0 +1,38 @@
+yum install mysql-server
+/etc/init.d/mysqld start
+mysql -u root -p
+SHOW DATABASES;
+CREATE DATABASE database name;
+DROP DATABASE database name;
+USE events;
+
+
+
+SHOW tables;
+CREATE TABLE potluck (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, 
+name VARCHAR(20),
+food VARCHAR(30),
+confirmed CHAR(1), 
+signup_date DATE);
+
+SHOW TABLES;
+
+DESCRIBE potluck;
+
+INSERT INTO `potluck` (`id`,`name`,`food`,`confirmed`,`signup_date`) VALUES (NULL, "John", "Casserole","Y", '2012-04-11');
+
+SELECT * FROM potluck;
+
+
+UPDATE `potluck` 
+SET 
+`confirmed` = 'Y' 
+WHERE `potluck`.`name` ='Sandy';
+
+ALTER TABLE potluck ADD email VARCHAR(40);
+
+ALTER TABLE potluck ADD email VARCHAR(40) AFTER name;
+ALTER TABLE potluck DROP email;
+
+
+DELETE from [table name] where [column name]=[field text];

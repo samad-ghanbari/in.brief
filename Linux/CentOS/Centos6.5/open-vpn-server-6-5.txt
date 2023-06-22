@@ -1,0 +1,75 @@
+******************Part One – VPN Server Side Configuration  (CentOS 6.5)
+
+******************Install OpenVPN Software
+yum install openvpn easy-rsa
+mkdir -p /etc/openvpn/easy-rsa/keys
+cp -rf /usr/share/easy-rsa/2.0/* /etc/openvpn/easy-rsa/
+
+
+******************Generate CA Certificate and CA key
+vi /etc/openvpn/easy-rsa/vars
+# Don't leave any of these fields blank.
+export KEY_COUNTRY="IN"
+export KEY_PROVINCE="TN"
+export KEY_CITY="Erode"
+export KEY_ORG="Unixmen"
+export KEY_EMAIL="sk@unixmen.com"
+export KEY_OU="server"
+
+cd /etc/openvpn/easy-rsa/
+cp openssl-1.0.0.cnf openssl.cnf
+source ./vars
+./clean-all
+./build-ca
+./build-key-server server
+./build-key client
+./build-dh
+
+***************** Copy certificate and key files to the /etc/openvpn/ directory.
+cd /etc/openvpn/easy-rsa/keys/
+cp dh2048.pem ca.crt server.crt server.key /etc/openvpn/
+
+scp ca.crt client.crt client.key root@client-ipaddress:/etc/openvpn
+
+******************Remove Client access to VPN server
+. /etc/openvpn/easy-rsa/2.0/vars
+. /etc/openvpn/easy-rsa/2.0/revoke-full client
+
+******************Configuring VPN Server
+cp /usr/share/doc/openvpn-2.3.2/sample/sample-config-files/server.conf /etc/openvpn/
+vi /etc/openvpn/server.conf
+dh dh2048.pem
+push "redirect-gateway def1 bypass-dhcp"
+push "dhcp-option DNS 8.8.8.8"
+push "dhcp-option DNS 8.8.4.4"
+user nobody
+group nobody
+Save and close the file.
+cp /usr/share/doc/openvpn-2.3.2/sample/sample-config-files/client.conf /home/
+vi /home/client.conf
+remote  server-address 1194
+scp /home/client.conf root@client-ipaddress:/etc/openvpn
+
+
+******************IP forwarding and routing Configuration
+vi /etc/sysctl.conf
+net.ipv4.ip_forward = 1
+sysctl -p
+iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE
+service iptables save
+service iptables restart
+openvpn --genkey --secret /etc/openvpn/ta.key
+service openvpn start
+chkconfig openvpn on
+
+
+
+
+
+************************Part Two – VPN Client side configuration
+
+
+yum install openvpn
+scp root@server-ipaddress:/etc/openvpn/ta.key  /etc/openvpn/
+service openvpn start
+chkconfig openvpn on

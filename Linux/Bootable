@@ -1,0 +1,8 @@
+1-  fdisk -l
+  => find flash disk , suppose it is sdb
+2-  fdisk /dev/sdb
+3-  delete all existing partitions
+4-  create one partition 
+5-  make it bootable (No need to format it)
+6   dd if={/home/a.iso   |   /dev/cdrom}   of=/dev/sdb
+

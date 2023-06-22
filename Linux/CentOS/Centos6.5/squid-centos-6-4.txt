@@ -1,0 +1,12 @@
+yum install squid -y
+vi /etc/squid/squid.conf
+acl lan src 10.0.0.0/8
+http_access allow lan
+http_port 3128 transparent
+visible_hostname pxy.broexperts.com
+Service squid start
+Chkconfig squid on
+iptables -t nat -A PREROUTING -i eth1 -p tcp --dport 80 -j DNAT --to 10.0.0.1:3128
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 3128
+iptables -I INPUT -s 10.0.0.0/8 -p tcp --dport 3128 -j ACCEPT
+

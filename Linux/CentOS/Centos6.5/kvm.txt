@@ -1,0 +1,67 @@
+﻿-grep -E '(vmx|svm)' /proc/cpuinfo
+
+Step:1 Install KVM and its associate packages
+-yum install qemu-kvm qemu-img virt-manager libvirt libvirt-python libvirt-client virt-install virt-viewer bridge-utils
+
+***Start and enable the libvirtd service
+-systemctl start libvirtd
+-systemctl enable libvirtd
+-lsmod | grep kvm
+
+***install graphic
+yum install "@X Window System" xorg-x11-xauth xorg-x11-fonts-* xorg-x11-utils -y
+
+
+Step:2 Start the Virt Manager
+-virt-manager
+
+Step:3 Configure Bridge Interface
+-cd /etc/sysconfig/network-scripts/
+-cp ifcfg-eno49 ifcfg-br0
+
+-vi ifcfg-eno49
+TYPE=Ethernet
+BOOTPROTO=static
+DEVICE=eno49
+ONBOOT=yes
+BRIDGE=br0
+
+-vi ifcfg-br0
+TYPE=Bridge
+BOOTPROTO=static
+DEVICE=br0
+ONBOOT=yes
+IPADDR=192.168.10.21
+NETMASK=255.255.255.0
+GATEWAY=192.168.10.1
+DNS1=192.168.10.11
+
+-systemctl restart network
+-ip addr show br0
+
+Step:4 Start Creating Virtual Machines.
+-virt-install  (from command line)
+***
+virt-install --name=Ubuntu-16-04 --file=/var/lib/libvirt/images/ubuntu16-04.dsk --file-size=20 --nonsparse --graphics spice --vcpus=2 --ram=2048 --cdrom=ubuntu-16.04-server-amd64.iso --network bridge=br0 --os-type=linux --os-variant=generic
+Starting install...
+Allocating 'ubuntu16-04.dsk'               | 20 GB 00:00:00
+Creating domain...
+
+
+In the above ‘virt-install’ command we have used following options :
+
+    –name = <Name of the Virtual Machine>
+    –file = <Location where our virtual machine disk file will be stored >
+    –file-size = < Size of the Virtual Machine, in my case it is 20GB >
+    –nonsparse = < Allocate the whole storage while creating>
+    –graphics = < Specify the graphical tool for interactive installation, in above example I am using spice >
+    –vcpu = < Number of virtual CPU for the Machine >
+    –ram = < RAM size for the virtual Machine >
+    –cdrom = < Virtual CD ROM which specify the installation media like ISO file >
+    –network = < it is used to specify which network we will use for the virtual machine, in this example I am bridge interface>
+    –os-type = < Operating system type like linux and window>
+    –os-variant= <KVM maintains the OS variants like ‘fedora18′, ‘rhel6’ and ‘winxp’ , this option is optional and if you not sure about OS variant you can mentioned it as generic>
+
+***
+-virt-manager  (from gui)
+

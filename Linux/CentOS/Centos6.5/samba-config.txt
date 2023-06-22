@@ -1,0 +1,65 @@
+# yum install samba samba-client samba-common
+
+# smbd --version
+# chkconfig smb on
+# chkconfig nmb on
+
+
+
+# iptables -I INPUT 4 -m state --state NEW -m udp -p udp --dport 137 -j ACCEPT
+# iptables -I INPUT 5 -m state --state NEW -m udp -p udp --dport 138 -j ACCEPT
+# iptables -I INPUT 6 -m state --state NEW -m tcp -p tcp --dport 139 -j ACCEPT
+# service iptables save
+
+
+
+# cp /etc/samba/smb.conf /etc/samba/smb.conf.bak
+# rm /etc/samba/smb.conf
+# touch /etc/samba/smb.conf
+# nano /etc/samba/smb.conf
+
+
+
+# mkdir -p /home/samba/share
+# chmod -R 0777 /home/samba/share
+
+
+
+[global]
+workgroup = WORKGROUP
+security = share
+[MyShare]
+path = /home/samba/share
+browsable =yes
+writable = yes
+guest ok = yes
+read only = no
+
+# service smb restart
+# service nmb restart
+
+
+# useradd smbuser
+# groupadd smbgrp
+# usermod -a -G smbgrp smbuser
+# smbpasswd -a smbuser
+
+
+# cd /home/samba/
+# mkdir secure
+# chown -R smbuser:smbgrp secure/
+# chmod -R 0770 secure/
+
+# vi /etc/samba/smb.conf
+[Secure]
+path = /home/samba/secure
+valid users = @smbgrp
+guest ok = no
+writable = yes
+browsable = yes
+
+
+
+
+semanage fcontext -a -t samba_share_t '/mnt/data(/.*)?'
+restorecon -R /mnt/data
